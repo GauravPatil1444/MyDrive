@@ -5,6 +5,10 @@ import folder from '../assets/folder.png';
 import file from '../assets/file.png';
 import Search from "./Search";
 import Navbar from "./Navbar";
+import { storage } from '../../firebaseConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { auth } from "../../firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
 
 function Main() {
 
@@ -22,9 +26,19 @@ function Main() {
     const [uploadbtn, setuploadbtn] = useState(false);
     const [foldername, setfoldername] = useState("");
     const [add, setadd] = useState(false);
-    const [heading, setheading] = useState("My Drive");
+    const [heading, setheading] = useState("MyDrive");
+    const [placeholder, setplaceholder] = useState("MyDrive");
+    const [fileData, setfileData] = useState<any>();
 
     useEffect(() => {
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log("User is signed in:", user.email);
+            } else {
+                console.log("No user signed in.");
+                window.location.assign('/auth');
+            }
+        });
         const stored = localStorage.getItem('data');
         if (stored) {
             const parsed = JSON.parse(stored);
@@ -36,7 +50,8 @@ function Main() {
         }
     }, []);
 
-    const chooseFile = (value: string) => {
+    const chooseFile = (value: string, file: any) => {
+        console.log(file[0]);
         const name = value.split("\\").pop() || "";
         setfileName(name);
         setuploadbtn(true);
@@ -55,7 +70,7 @@ function Main() {
         setfoldername("");
     };
 
-    const handleUpload = (id: string, type: string, name: string) => {
+    const handleUpload = async (id: string, type: string, name: string, fileData: any) => {
         setnewFile(false);
         setdata(prev => {
             const safePrev = Array.isArray(prev) ? prev : [];
@@ -63,6 +78,12 @@ function Main() {
             localStorage.setItem('data', JSON.stringify(updated));
             return updated;
         });
+        const filePath = `${name}`;
+        const storageRef = ref(storage, filePath);
+
+        // Upload the file
+        const uploadResult = await uploadBytes(storageRef, fileData);
+        console.log('Uploaded a file!', uploadResult);
 
         setfileName("");
         setuploadbtn(false);
@@ -72,17 +93,19 @@ function Main() {
     const itemClick = (item: DataType) => {
         console.log(item);
         setheading(item.name);
-        
+        if (item.type == "folder") {
+            setplaceholder(item.name);
+        }
     };
 
     const displayData = filteredData.length > 0 ? filteredData : data;
 
     return (
         <>
-            <Navbar heading={heading} setheading={setheading} />
-            <div className="container mx-auto md:max-w-xl p-3">
+            <Navbar heading={heading} setheading={setheading} setplaceholder={setplaceholder} />
+            <div className="pt-16 mx-auto md:max-w-xl p-3">
 
-                <Search data={data} setFilteredData={setFilteredData} setadd={setadd} />
+                <Search data={data} placeholder={placeholder} setFilteredData={setFilteredData} setadd={setadd} />
 
                 {add && <div className="btn-group justify-center flex gap-2">
                     <button
@@ -127,7 +150,7 @@ function Main() {
                             <input
                                 type="file"
                                 className="hidden"
-                                onChange={(e) => chooseFile(e.target.value)}
+                                onChange={(e) => chooseFile(e.target.value, e.target.files)}
                             />
 
                             {fileName && (
@@ -138,7 +161,7 @@ function Main() {
                         {uploadbtn && (
                             <button
                                 className="mx-auto mt-3 cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium"
-                                onClick={() => handleUpload(crypto.randomUUID(), "file", fileName)}
+                                onClick={() => handleUpload(crypto.randomUUID(), "file", fileName, fileData)}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} > <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /> </svg>
                                 Upload
@@ -182,7 +205,7 @@ function Main() {
                             </div>
                         ))}
                     </div>
-                ): <p className="text-center">No Items</p>
+                ) : <p className="text-center">No Items</p>
                 }
 
             </div>

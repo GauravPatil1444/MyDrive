@@ -4,10 +4,13 @@ import light from '../assets/brightness.png'
 import dark from '../assets/night-mode.png'
 import back from '../assets/back.png'
 import { Link } from "react-router";
+import { useLocation } from "react-router";
 
-function Navbar({heading,setheading}:any) {
+function Navbar({heading, setheading, setplaceholder}:any) {
   
     const [togglemode, settogglemode] = useState(true);
+
+    const location = useLocation();
 
     const toggle = ()=>{
         if(togglemode){
@@ -20,22 +23,31 @@ function Navbar({heading,setheading}:any) {
         }
         settogglemode(!togglemode);
     }
+
+    const handleBack = ()=>{
+      setheading("MyDrive");
+      setplaceholder("MyDrive");
+    }
     
     useEffect(() => {
       const theme = localStorage.getItem('theme');
       if(theme=='dark'){
         settogglemode(true);
+        document.documentElement.setAttribute('data-theme','dark');
+        localStorage.setItem('theme','dark');
       }
       else{
         settogglemode(false);
+        document.documentElement.setAttribute('data-theme','light');
+        localStorage.setItem('theme','light');
       }
-    }, [])
+    }, [location])
 
     return (
-    <nav className='p-3 flex shadow-md/20 shadow-sky-300 justify-between '>
-        <button onClick={()=>setheading("MyDrive")}>
-          <img className='md:ms-10' width={30} src={heading=="MyDrive"?logo:back} alt="Logo" />
-        </button>
+    <nav className='p-3 flex shadow-md/20 shadow-sky-300 justify-between fixed w-full'>
+        <Link to={'/'} className='cursor-pointer' onClick={handleBack}>
+          <img className='md:ms-10' width={30} src={heading=="MyDrive"||heading=="Authentication"?logo:back} alt="Logo" />
+        </Link>
         <div className="flex gap-5">
           <Link to={'/'}>
             <p className='text-slate-800 dark:text-white font-medium'>{heading}</p>

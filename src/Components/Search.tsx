@@ -10,10 +10,11 @@ interface DataType {
 interface Props {
   data: DataType[];
   setFilteredData: (data: DataType[]) => void;
-  setadd: any
+  setadd: any;
+  placeholder:string;
 }
 
-function Search({ data, setFilteredData, setadd }: Props) {
+function Search({placeholder, data, setFilteredData, setadd }: Props) {
 
   const [searchInput, setsearchInput] = useState('');
   const timeoutRef = useRef<any>(null);
@@ -52,7 +53,7 @@ function Search({ data, setFilteredData, setadd }: Props) {
           <input
             className="text-slate-800 dark:text-white w-full outline-0 text-lg bg-transparent"
             type="text"
-            placeholder="Search MyDrive"
+            placeholder={`Search ${placeholder}`}
             value={searchInput}
             onChange={(e) => search(e.target.value)}
           />
