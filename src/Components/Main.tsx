@@ -5,12 +5,14 @@ import folder from '../assets/folder.png';
 import file from '../assets/file.png';
 import Search from "./Search";
 import Navbar from "./Navbar";
-import { storage } from '../../firebaseConfig';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
 import { auth } from "../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
+import { useSearchParams } from "react-router";
 
 function Main() {
+
+    const storage = getStorage();
 
     interface DataType {
         id: string,
@@ -29,6 +31,7 @@ function Main() {
     const [heading, setheading] = useState("MyDrive");
     const [placeholder, setplaceholder] = useState("MyDrive");
     const [fileData, setfileData] = useState<any>();
+    const [loading, setloading] = useState(false);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -63,40 +66,79 @@ function Main() {
         setdata(prev => {
             const safePrev = Array.isArray(prev) ? prev : [];
             const updated = [...safePrev, { id, type, name }];
-            localStorage.setItem('data', JSON.stringify(updated));
             return updated;
         });
         setadd(false);
         setfoldername("");
     };
 
-    const handleUpload = async (id: string, type: string, name: string, fileData: any) => {
+    const handleUpload = async (fileData: any) => {
+        setloading(true);
         setnewFile(false);
+        const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files/${placeholder}/${fileName}`;
+        const storageRef = ref(storage, url);
+        await uploadBytes(storageRef, fileData).then((snapshot) => {
+            console.log('Data Uploaded!', snapshot);
+        })
         setdata(prev => {
             const safePrev = Array.isArray(prev) ? prev : [];
-            const updated = [...safePrev, { id, type, name }];
-            localStorage.setItem('data', JSON.stringify(updated));
+            const updated = [...safePrev, { id:url, type: "file", name: fileName }];
             return updated;
         });
-        const filePath = `${name}`;
-        const storageRef = ref(storage, filePath);
-
-        // Upload the file
-        const uploadResult = await uploadBytes(storageRef, fileData);
-        console.log('Uploaded a file!', uploadResult);
-
+        setadd(false);
         setfileName("");
         setuploadbtn(false);
-        setadd(false);
+        setloading(false);
     };
 
-    const itemClick = (item: DataType) => {
-        console.log(item);
-        setheading(item.name);
-        if (item.type == "folder") {
-            setplaceholder(item.name);
+    const itemClick = async (item: DataType) => {
+        if (!loading) {
+            // console.log(item);
+            setheading(item.name);
+            if (item.type == "folder") {
+                setdata([]);
+                setloading(true);
+                setplaceholder(item.name);
+                const storageRef = ref(storage, `${auth.currentUser?.uid}/files/${item.name}`);
+                const res = await listAll(storageRef);
+                res.items.forEach(async (itemRef) => {
+                    const url = await getDownloadURL(itemRef);
+                    console.log("File:", itemRef.name, url);
+                    setdata(prev => {
+                        const updated = [...prev, {id:url,type:"file",name:itemRef.name}];
+                        return updated;
+                    });
+                });
+
+                res.prefixes.forEach((folderRef) => {
+                    const folderPath = folderRef.fullPath.split('/');
+                    const folder = folderPath[folderPath.length-1];
+                    setdata(prev => {
+                        const updated = [...prev, {id:folderRef.fullPath,type:"folder",name:folder}];
+                        return updated;
+                    });
+                });
+                setloading(false);
+            }
         }
     };
+
+    useEffect(() => {
+      if(heading=="MyDrive"){
+        setloading(true);
+        const stored = localStorage.getItem('data');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed)) {
+                setdata(parsed);
+            } else {
+                setdata([]);
+            }
+        }
+        setloading(false);
+      }
+    }, [heading])
+    
 
     const displayData = filteredData.length > 0 ? filteredData : data;
 
@@ -161,7 +203,7 @@ function Main() {
                         {uploadbtn && (
                             <button
                                 className="mx-auto mt-3 cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium"
-                                onClick={() => handleUpload(crypto.randomUUID(), "file", fileName, fileData)}
+                                onClick={() => handleUpload(fileData)}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} > <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /> </svg>
                                 Upload
@@ -197,7 +239,7 @@ function Main() {
                                 onClick={() => itemClick(item)}
                             >
                                 <img
-                                    className="w-[35vw] h-[35vw] md:h-[20vh]"
+                                    className={`w-[35vw] h-[35vw] md:h-[20vh] ${loading?"animate-pulse":""}`}
                                     src={item.type === "folder" ? folder : file}
                                     alt="item"
                                 />
@@ -205,7 +247,8 @@ function Main() {
                             </div>
                         ))}
                     </div>
-                ) : <p className="text-center">No Items</p>
+                ) : 
+                    <p className="dark:text-white font-medium text-center text-lg">{placeholder} is empty</p>
                 }
 
             </div>

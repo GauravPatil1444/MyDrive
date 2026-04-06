@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../../firebaseConfig'
-import { signInWithEmailAndPassword } from "firebase/auth";
 import loader from '../assets/loading.png'
 
 function Authentication() {
@@ -29,7 +28,11 @@ function Authentication() {
     const handleSignin = async () => {
         try {
             setloading(true);
-            await createUserWithEmailAndPassword(auth, email, password);
+            const credential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = credential.user;
+            await updateProfile(user, {
+                displayName: name,
+            });
             setloading(false);
             window.location.assign('/');
         }
@@ -48,7 +51,6 @@ function Authentication() {
             handleSignin();
         }
     };
-
 
     return (
         <>

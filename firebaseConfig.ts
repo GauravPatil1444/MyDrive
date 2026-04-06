@@ -17,5 +17,5 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const storage = getStorage(app);
+export const storage = getStorage(app, "gs://mydrive-1444.firebasestorage.app");
 export const auth = getAuth(app);
