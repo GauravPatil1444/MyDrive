@@ -15,7 +15,9 @@ function Authentication() {
     const handleLogin = async () => {
         try {
             setloading(true);
-            await signInWithEmailAndPassword(auth, email, password);
+            const credential = await signInWithEmailAndPassword(auth, email, password);
+            console.log(credential.user);
+            localStorage.setItem('user',JSON.stringify(credential.user.uid));
             setloading(false);
             window.location.assign('/');
         }
@@ -30,6 +32,7 @@ function Authentication() {
             setloading(true);
             const credential = await createUserWithEmailAndPassword(auth, email, password);
             const user = credential.user;
+            localStorage.setItem('user',JSON.stringify(user.uid));
             await updateProfile(user, {
                 displayName: name,
             });
