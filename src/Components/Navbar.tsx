@@ -5,7 +5,6 @@ import dark from '../assets/night-mode.png'
 import back from '../assets/back.png'
 import { Link } from "react-router";
 import { useLocation } from "react-router";
-import { auth } from '../../firebaseConfig';
 
 function Navbar({heading, setheading, setplaceholder}:any) {
   
@@ -46,16 +45,15 @@ function Navbar({heading, setheading, setplaceholder}:any) {
     }, [location])
 
     useEffect(() => {
-      if(auth.currentUser?.photoURL){
-        setprofile(auth.currentUser?.photoURL);
-      }
+      const url = localStorage.getItem('profile');
+      setprofile(url);
     }, [])
     
 
     return (
     <nav className='p-3 flex shadow-md/20 shadow-sky-300 justify-between fixed w-full'>
         <Link to={heading=="MyDrive"?'/profile':'/'} className='cursor-pointer' onClick={handleBack}>
-          <img className='md:ms-10 rounded-full w-8 h-8 object-cover' width={30} src={heading=="MyDrive"||heading=="Authentication"?profile.length!=0?profile:logo:back} alt="Logo" />
+          <img className='md:ms-10 rounded-full w-8 h-8 object-cover' width={30} src={heading=="MyDrive"||heading=="Authentication"?profile!="null"?profile:logo:back} alt="Logo" />
         </Link>
         <div className="flex gap-5">
           <Link to={'/'}>
