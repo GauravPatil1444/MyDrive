@@ -4,9 +4,11 @@ import profileLight from '../assets/profile-light.png'
 import { auth } from "../../firebaseConfig"
 import { useEffect, useState } from "react"
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { onAuthStateChanged, updateProfile, signOut } from "firebase/auth"; 
+import { onAuthStateChanged, updateProfile, signOut } from "firebase/auth";
 import loader from "../assets/loading.png";
 import save from "../assets/save.png";
+import exit from "../assets/exit.png";
+import Edit from "../assets/edit.png";
 
 function Profile() {
 
@@ -28,42 +30,42 @@ function Profile() {
         setfileData(file[0]);
     }
 
-    const handleUpload = async() => {
+    const handleUpload = async () => {
         setloading(true);
         const storageRef = ref(storage, `${auth.currentUser?.uid}/profile/${fileName}`);
         await uploadBytes(storageRef, fileData).then((snapshot) => {
-            console.log('Profile Updated!',snapshot);
+            console.log('Profile Updated!', snapshot);
         })
-        await getDownloadURL(storageRef).then(async(url)=>{
+        await getDownloadURL(storageRef).then(async (url) => {
             console.log(url);
-            const user:any = auth.currentUser;
+            const user: any = auth.currentUser;
             setprofileimg(url)
             await updateProfile(user, {
                 photoURL: url,
             });
             setprofileimg(user.photoURL);
-            localStorage.setItem('profile',url);
+            localStorage.setItem('profile', url);
         })
         setedit(false);
         setloading(false);
     }
 
-    const handleLogout = async() =>{
+    const handleLogout = async () => {
         await signOut(auth);
         window.location.assign("/auth");
     }
 
-    const handleSave = async()=>{
-        if(Name.length>0){
+    const handleSave = async () => {
+        if (Name.length > 0) {
             setloading(true);
-            const user:any = auth.currentUser;
+            const user: any = auth.currentUser;
             await updateProfile(user, {
                 displayName: Name
             });
             setname(Name);
             setloading(false);
         }
-        if(fileName.length>0){
+        if (fileName.length > 0) {
             handleUpload();
         }
     }
@@ -71,12 +73,12 @@ function Profile() {
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                setname( user.displayName)
+                setname(user.displayName)
                 setemail(user.email)
-                if(user.photoURL!=null){
+                if (user.photoURL != null) {
                     setprofileimg(user.photoURL)
                 }
-                else{
+                else {
                     setprofileimg("")
                 }
             } else {
@@ -92,10 +94,10 @@ function Profile() {
             <Navbar heading="Profile" />
             <div className="pt-20">
                 <div className="mx-auto w-32 h-32 rounded-full p-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 ">
-                    {profileimg.length==0?<>
+                    {profileimg.length == 0 ? <>
                         <img className="hidden dark:block" src={profileDark} alt="Profile" />
                         <img className="dark:hidden" src={profileLight} alt="Profile" />
-                        </>:
+                    </> :
                         <img className="w-full h-full rounded-full object-cover" src={profileimg} alt="Profile" />
                     }
                 </div>
@@ -103,19 +105,27 @@ function Profile() {
                     <p className="text-center text-xl dark:text-gray-50">{name}</p>
                     <p className="text-center text-xl dark:text-gray-50">{email}</p>
                 </div>
-                <div className="mt-3 flex gap-5">
+                <div className="mt-3 flex gap-5 justify-center">
                     <button
-                        className="me-0 mx-auto cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg"
+                        className="me-0 flex gap-2 ms-0 mx-auto cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-xl"
                         onClick={() => setedit(true)}
                     >
+                        <img width={25} src={Edit} alt="" />
                         Edit profile
                     </button>
                     <button
-                        className="ms-0 mx-auto cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg"
+                        className="ms-0 flex gap-2 me-0 mx-auto cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-xl"
                         onClick={handleLogout}
                     >
+                        <img width={25} src={exit} alt="" />
                         Logout
                     </button>
+                    {/* <button
+                        className="cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg"
+                        onClick={handleLogout}
+                    >
+                        Sync Data
+                    </button> */}
                 </div>
                 {edit && (
                     <div className="p-3 flex flex-col align-center">
@@ -149,7 +159,7 @@ function Profile() {
                                 <p className="mt-2 text-center text-sky-400">{fileName}</p>
                             )}
                         </label>
-                        
+
                         <p className="text-center text-lg dark:text-gray-50 mt-5">Update Name:</p>
                         <input
                             type="text"
@@ -159,19 +169,20 @@ function Profile() {
                             className="mx-auto p-2 border w-3/4 border-sky-400 rounded outline-none dark:text-white bg-transparent"
                         />
 
-                        {fileName.length>0 || Name.length>0 ? (
+                        {fileName.length > 0 || Name.length > 0 ? (
                             <button
                                 className="mx-auto mt-3 cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-xl"
                                 onClick={() => handleSave()}
                                 disabled={loading}
                             >
-                                {!loading?<img className="animate-bounce" width={25} src={save} alt="" />:
-                                <img className="animate-spin" width={25} src={loader} alt="Loading..." />}
+                                {!loading ? <img className="animate-bounce" width={25} src={save} alt="" /> :
+                                    <img className="animate-spin" width={25} src={loader} alt="Loading..." />}
                                 Save
                             </button>
-                        ):""}
+                        ) : ""}
                     </div>
                 )}
+                
             </div>
         </>
     )

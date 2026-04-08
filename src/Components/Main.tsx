@@ -86,6 +86,7 @@ function Main() {
         setdata(prev => {
             const safePrev = Array.isArray(prev) ? prev : [];
             const updated = [...safePrev, { id, type, name }];
+            localStorage.setItem('data',JSON.stringify(updated));
             return updated;
         });
         setadd(false);
@@ -100,12 +101,22 @@ function Main() {
         await uploadBytes(storageRef, fileData).then((snapshot) => {
             console.log('Data Uploaded!', snapshot);
         })
-        setdata(prev => {
-            const safePrev = Array.isArray(prev) ? prev : [];
-            const updated = [...safePrev, { id: url, type: "file", name: fileName }];
-            localStorage.setItem('data',JSON.stringify(updated));
-            return updated;
-        });
+        const id = await getDownloadURL(storageRef);
+        if(heading=="MyDrive"){
+            setdata(prev => {
+                const safePrev = Array.isArray(prev) ? prev : [];
+                const updated = [...safePrev, { id: id, type: "file", name: fileName }];
+                localStorage.setItem('data',JSON.stringify(updated));
+                return updated;
+            });
+        }
+        else{
+            setdata(prev => {
+                const safePrev = Array.isArray(prev) ? prev : [];
+                const updated = [...safePrev, { id: id, type: "file", name: fileName }];
+                return updated;
+            });
+        }
         setadd(false);
         setfileName("");
         setuploadbtn(false);
@@ -206,7 +217,7 @@ function Main() {
                         
                         {add && <div className="btn-group justify-center flex gap-2">
                             <button
-                                className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium"
+                                className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-lg"
                                 onClick={() => { setnewFile(true); setnewFolder(false); }}
                             >
                                 <img height={15} width={25} src={fileIcon} alt="file" />
@@ -214,7 +225,7 @@ function Main() {
                             </button>
 
                             <button
-                                className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium"
+                                className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-lg"
                                 onClick={() => { setnewFile(false); setnewFolder(true); }}
                             >
                                 <img width={25} height={20} src={folderIcon} alt="folder" />
