@@ -36,17 +36,18 @@ function Main() {
     const [loading, setloading] = useState(false);
     const [fileInfo, setfileInfo] = useState<DataType>();
     const [viewFile, setviewFile] = useState(false);
+    const [fileStack, setfileStack] = useState("");
 
 
     const syncData = async () => {
         setloading(true);
-        const id:any = localStorage.getItem('user');
-        if(id===null){
+        const id: any = localStorage.getItem('user');
+        if (id === null) {
             window.location.assign("/auth")
         }
         const storageRef = ref(storage, `${JSON.parse(id)}/files/`);
-        console.log("-->",storageRef);
-        
+        console.log("-->", storageRef);
+
         const res = await listAll(storageRef);
         res.items.forEach(async (itemRef) => {
             const url = await getDownloadURL(itemRef);
@@ -54,7 +55,7 @@ function Main() {
             setdata(prev => {
                 const safePrev = Array.isArray(prev) ? prev : [];
                 const updated = [...safePrev, { id: url, type: "file", name: itemRef.name }];
-                localStorage.setItem('data',JSON.stringify(updated));
+                localStorage.setItem('data', JSON.stringify(updated));
                 return updated;
             });
         });
@@ -65,7 +66,7 @@ function Main() {
             setdata(prev => {
                 const safePrev = Array.isArray(prev) ? prev : [];
                 const updated = [...safePrev, { id: folderRef.fullPath, type: "folder", name: folder }];
-                localStorage.setItem('data',JSON.stringify(updated));
+                localStorage.setItem('data', JSON.stringify(updated));
                 return updated;
             });
         });
@@ -86,7 +87,7 @@ function Main() {
         setdata(prev => {
             const safePrev = Array.isArray(prev) ? prev : [];
             const updated = [...safePrev, { id, type, name }];
-            localStorage.setItem('data',JSON.stringify(updated));
+            localStorage.setItem('data', JSON.stringify(updated));
             return updated;
         });
         setadd(false);
@@ -96,21 +97,21 @@ function Main() {
     const handleUpload = async () => {
         setloading(true);
         setnewFile(false);
-        const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files/${placeholder}/${fileName}`;
+        const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files${fileStack}/${fileName}`;
         const storageRef = ref(storage, url);
         await uploadBytes(storageRef, fileData).then((snapshot) => {
             console.log('Data Uploaded!', snapshot);
         })
         const id = await getDownloadURL(storageRef);
-        if(heading=="MyDrive"){
+        if (heading == "MyDrive") {
             setdata(prev => {
                 const safePrev = Array.isArray(prev) ? prev : [];
                 const updated = [...safePrev, { id: id, type: "file", name: fileName }];
-                localStorage.setItem('data',JSON.stringify(updated));
+                localStorage.setItem('data', JSON.stringify(updated));
                 return updated;
             });
         }
-        else{
+        else {
             setdata(prev => {
                 const safePrev = Array.isArray(prev) ? prev : [];
                 const updated = [...safePrev, { id: id, type: "file", name: fileName }];
@@ -123,7 +124,39 @@ function Main() {
         setloading(false);
     };
 
+    const listItems = async (res:any) => {
+        res.items.forEach(async (itemRef:any) => {
+            const url = await getDownloadURL(itemRef);
+            console.log("File:", itemRef.name, url);
+            setdata(prev => {
+                const updated = [...prev, { id: url, type: "file", name: itemRef.name }];
+                return updated;
+            });
+        });
+
+        res.prefixes.forEach((folderRef:any) => {
+            const folderPath = folderRef.fullPath.split('/');
+            const folder = folderPath[folderPath.length - 1];
+            setdata(prev => {
+                const updated = [...prev, { id: folderRef.fullPath, type: "folder", name: folder }];
+                return updated;
+            });
+        });
+    }
+
     const itemClick = async (item: DataType) => {
+
+        if(item.id=="1444"){
+            setheading(item.name.split('/')[item.name.split('/').length-1]);
+            setdata([]);
+            setloading(true);
+            setplaceholder(item.name.split('/')[item.name.split('/').length-1]);
+            const storageRef = ref(storage, `${auth.currentUser?.uid}/files${item.name}`);
+            const res = await listAll(storageRef);
+            await listItems(res);
+            setloading(false);
+            return;
+        }
         if (!loading) {
             // console.log(item);
             setheading(item.name);
@@ -131,25 +164,9 @@ function Main() {
                 setdata([]);
                 setloading(true);
                 setplaceholder(item.name);
-                const storageRef = ref(storage, `${auth.currentUser?.uid}/files/${item.name}`);
+                const storageRef = ref(storage, `${heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${item.name}` : `${auth.currentUser?.uid}/files${fileStack}/${item.name}`}`);
                 const res = await listAll(storageRef);
-                res.items.forEach(async (itemRef) => {
-                    const url = await getDownloadURL(itemRef);
-                    console.log("File:", itemRef.name, url);
-                    setdata(prev => {
-                        const updated = [...prev, { id: url, type: "file", name: itemRef.name }];
-                        return updated;
-                    });
-                });
-
-                res.prefixes.forEach((folderRef) => {
-                    const folderPath = folderRef.fullPath.split('/');
-                    const folder = folderPath[folderPath.length - 1];
-                    setdata(prev => {
-                        const updated = [...prev, { id: folderRef.fullPath, type: "folder", name: folder }];
-                        return updated;
-                    });
-                });
+                await listItems(res);
                 setloading(false);
             }
             else {
@@ -161,6 +178,7 @@ function Main() {
 
     useEffect(() => {
         if (heading == "MyDrive") {
+            setfileStack("");
             setloading(true);
             const stored = localStorage.getItem('data');
             if (stored) {
@@ -172,6 +190,10 @@ function Main() {
                 }
             }
             setloading(false);
+        }
+        else {
+            setfileStack(`${fileStack}/${heading}`)
+            console.log(fileStack);
         }
     }, [heading])
 
@@ -193,7 +215,7 @@ function Main() {
                 setdata([]);
             }
         }
-        else{
+        else {
             syncData();
         }
     }, []);
@@ -203,18 +225,18 @@ function Main() {
 
     return (
         <>
-            {viewFile ? <FileInfo fileInfo={fileInfo} /> :
+            {viewFile ? <FileInfo fileInfo={fileInfo} fileStack={fileStack} /> :
                 <>
-                    <Navbar heading={heading} setheading={setheading} setplaceholder={setplaceholder} />
+                    <Navbar heading={heading} setheading={setheading} setplaceholder={setplaceholder} itemClick={itemClick} fileStack={fileStack} setfileStack={setfileStack} />
                     <div className="pt-16 mx-auto md:max-w-xl p-3">
 
                         <Search data={data} placeholder={placeholder} setFilteredData={setFilteredData} setadd={setadd} />
-                        
-                        {loading&&<>
+
+                        {loading && <>
                             <img className={`animate-spin mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />
                             <img className={`animate-spin mx-auto dark:hidden`} width={45} src={loaderLight} alt="Loading..." />
                         </>}
-                        
+
                         {add && <div className="btn-group justify-center flex gap-2">
                             <button
                                 className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-lg"
@@ -314,7 +336,7 @@ function Main() {
                                 ))}
                             </div>
                         ) :
-                            !loading&&<p className="dark:text-white font-medium text-center text-lg">{placeholder} is empty</p>
+                            !loading && <p className="dark:text-white font-medium text-center text-lg">{placeholder} is empty</p>
                         }
 
                     </div>

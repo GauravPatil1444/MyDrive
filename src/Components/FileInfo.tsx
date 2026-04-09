@@ -8,7 +8,7 @@ import download from "../assets/download.png";
 import bin from "../assets/bin.png"
 
 
-function FileInfo({ fileInfo }: any) {
+function FileInfo({ fileInfo, fileStack }: any) {
 
   interface fileData {
     name: string;

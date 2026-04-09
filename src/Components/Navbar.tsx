@@ -6,7 +6,8 @@ import back from '../assets/back.png'
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 
-function Navbar({heading, setheading, setplaceholder}:any) {
+
+function Navbar({heading, setheading, setplaceholder, itemClick, fileStack, setfileStack}:any) {
   
     const [togglemode, settogglemode] = useState(true);
     const [profile, setprofile] = useState<any>("");
@@ -28,6 +29,16 @@ function Navbar({heading, setheading, setplaceholder}:any) {
     const handleBack = ()=>{
       setheading("MyDrive");
       setplaceholder("MyDrive");
+    }
+
+    const handleGoback = ()=>{
+      console.log(`${fileStack.split(`/${heading}`)[0].split('/')[fileStack.split(`/${heading}`)[0].split('/').length-1]}`);
+      const newarr = fileStack.split('/').filter((item:any)=>{
+        return item!=heading
+      })
+      const newFileStack = newarr.join('/');
+      setfileStack(newFileStack);
+      itemClick({id: "1444", type: "folder", name: newFileStack});
     }
     
     useEffect(() => {
@@ -52,9 +63,12 @@ function Navbar({heading, setheading, setplaceholder}:any) {
 
     return (
     <nav className='p-3 flex shadow-md/20 shadow-sky-300 justify-between fixed w-full md:min-w-full'>
-        <Link to={heading=="MyDrive"?'/profile':'/'} className='cursor-pointer' onClick={handleBack}>
+        {heading=="MyDrive" || heading=="Profile"?<Link to={heading=="MyDrive"?'/profile':'/'} className='cursor-pointer' onClick={handleBack}>
           <img className='md:ms-10 rounded-full w-8 h-8 object-cover' width={30} src={heading=="MyDrive"||heading=="Authentication"?profile!="null"?profile:logo:back} alt="Logo" />
-        </Link>
+        </Link>:
+        <button className='cursor-pointer' onClick={handleGoback}>
+          <img className='md:ms-10 rounded-full w-8 h-8 object-cover' width={30} src={heading=="MyDrive"||heading=="Authentication"?profile!="null"?profile:logo:back} alt="Logo" />
+        </button>}
         <div className="flex gap-5">
           <Link to={'/'}>
             <p className='text-slate-800 dark:text-white font-medium'>{heading}</p>
