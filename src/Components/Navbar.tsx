@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import logo from '../assets/react.svg'
-import light from '../assets/brightness.png'
-import dark from '../assets/night-mode.png'
-import back from '../assets/back.png'
+import logo from '../assets/Logo.png';
+import light from '../assets/brightness.png';
+import dark from '../assets/night-mode.png';
+import back from '../assets/back.png';
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 
 
-function Navbar({heading, setheading, setplaceholder, itemClick, fileStack, setfileStack}:any) {
+function Navbar({heading, setheading, setplaceholder, itemClick, fileStack, setfileStack, viewFile}:any) {
   
     const [togglemode, settogglemode] = useState(true);
     const [profile, setprofile] = useState<any>("");
@@ -32,7 +32,7 @@ function Navbar({heading, setheading, setplaceholder, itemClick, fileStack, setf
     }
 
     const handleGoback = ()=>{
-      console.log(`${fileStack.split(`/${heading}`)[0].split('/')[fileStack.split(`/${heading}`)[0].split('/').length-1]}`);
+      // console.log(`${fileStack.split(`/${heading}`)[0].split('/')[fileStack.split(`/${heading}`)[0].split('/').length-1]}`);
       const newarr = fileStack.split('/').filter((item:any)=>{
         return item!=heading
       })
@@ -62,8 +62,8 @@ function Navbar({heading, setheading, setplaceholder, itemClick, fileStack, setf
     
 
     return (
-    <nav className='p-3 flex shadow-md/20 shadow-sky-300 justify-between fixed w-full md:min-w-full'>
-        {heading=="MyDrive" || heading=="Profile"?<Link to={heading=="MyDrive"?'/profile':'/'} className='cursor-pointer' onClick={handleBack}>
+    <nav className='p-3 flex shadow-md/20 shadow-sky-300 justify-between backdrop-blur-sm fixed w-full md:min-w-full'>
+        {heading=="MyDrive" || heading=="Profile" || viewFile?<Link to={heading=="MyDrive"?'/profile':'/'} className='cursor-pointer' onClick={handleBack}>
           <img className='md:ms-10 rounded-full w-8 h-8 object-cover' width={30} src={heading=="MyDrive"||heading=="Authentication"?profile!="null"?profile:logo:back} alt="Logo" />
         </Link>:
         <button className='cursor-pointer' onClick={handleGoback}>

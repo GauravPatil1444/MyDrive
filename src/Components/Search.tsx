@@ -44,7 +44,7 @@ function Search({ placeholder, data, setFilteredData, setadd }: Props) {
   const handleDelete = async () => {
     const data:any = localStorage.getItem('data');
     const parsed = await JSON.parse(data);
-    console.log(parsed);
+    // console.log(parsed);
     const filteredData = await parsed.filter((item:any)=>{
       return item.name!==placeholder;
     })

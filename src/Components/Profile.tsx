@@ -34,10 +34,10 @@ function Profile() {
         setloading(true);
         const storageRef = ref(storage, `${auth.currentUser?.uid}/profile/${fileName}`);
         await uploadBytes(storageRef, fileData).then((snapshot) => {
-            console.log('Profile Updated!', snapshot);
+            // console.log('Profile Updated!', snapshot);
         })
         await getDownloadURL(storageRef).then(async (url) => {
-            console.log(url);
+            // console.log(url);
             const user: any = auth.currentUser;
             setprofileimg(url)
             await updateProfile(user, {
@@ -82,7 +82,7 @@ function Profile() {
                     setprofileimg("")
                 }
             } else {
-                console.log("No user signed in.");
+                // console.log("No user signed in.");
                 window.location.assign('/auth');
             }
         });

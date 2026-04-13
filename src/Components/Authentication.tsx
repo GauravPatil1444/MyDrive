@@ -16,7 +16,7 @@ function Authentication() {
         try {
             setloading(true);
             const credential = await signInWithEmailAndPassword(auth, email, password);
-            console.log(credential.user);
+            // console.log(credential.user);
             localStorage.setItem('user',JSON.stringify(credential.user.uid));
             setloading(false);
             window.location.assign('/');
@@ -47,10 +47,10 @@ function Authentication() {
 
     const handleSubmit = () => {
         if (isLogin) {
-            console.log("Login:", { email, password });
+            // console.log("Login:", { email, password });
             handleLogin();
         } else {
-            console.log("Signup:", { name, email, password });
+            // console.log("Signup:", { name, email, password });
             handleSignin();
         }
     };

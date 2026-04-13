@@ -6,9 +6,11 @@ import loader from "../assets/loading.png";
 import loaderLight from "../assets/loading_light.png";
 import download from "../assets/download.png";
 import bin from "../assets/bin.png"
+import zip from "../assets/zip.png";
+import imgFile from "../assets/image-file.png";
+import pdf from "../assets/pdf.png";
 
-
-function FileInfo({ fileInfo, fileStack }: any) {
+function FileInfo({ fileInfo }: any) {
 
   interface fileData {
     name: string;
@@ -40,17 +42,17 @@ function FileInfo({ fileInfo, fileStack }: any) {
     setloading(false);
   }
 
-  const handleDelete = async()=>{
+  const handleDelete = async () => {
     setDeleting(true);
     setDelete(false);
-    
-    const data:any = localStorage.getItem('data');
+
+    const data: any = localStorage.getItem('data');
     const parsed = await JSON.parse(data);
-    console.log(parsed);
-    const filteredData = await parsed.filter((item:any)=>{
-      return item.id!==fileInfo.id;
+    // console.log(parsed);
+    const filteredData = await parsed.filter((item: any) => {
+      return item.id !== fileInfo.id;
     })
-    localStorage.setItem('data',JSON.stringify(filteredData));
+    localStorage.setItem('data', JSON.stringify(filteredData));
 
     const urlObj = new URL(fileInfo.id);
     const path = urlObj.pathname;
@@ -59,11 +61,26 @@ function FileInfo({ fileInfo, fileStack }: any) {
     const fileRef = ref(storage, decodedPath);
 
     await deleteObject(fileRef).then(() => {
-      console.log(`${fileInfo.name} deleted successfully!`);
+      // console.log(`${fileInfo.name} deleted successfully!`);
     })
 
     setDeleting(false);
     window.location.assign("/");
+  }
+
+  const handleFileLogo = (name: string, id: string) => {
+    if (name.split('.')[1] == "zip" || name.split('.')[1] == "rar") {
+      return zip;
+    }
+    else if (name.split('.')[1] == "jpg" || name.split('.')[1] == "png" || name.split('.')[1] == "jpeg" || name.split('.')[1] == "webp" || name.split('.')[1] == "avif" || name.split('.')[1] == "gif") {
+      return id;
+    }
+    else if (name.split('.')[1] == "pdf") {
+      return pdf
+    }
+    else {
+      return file;
+    }
   }
 
   useEffect(() => {
@@ -83,14 +100,14 @@ function FileInfo({ fileInfo, fileStack }: any) {
 
   return (
     <>
-      <Navbar heading={fileInfo.name} />
+      <Navbar heading={fileInfo.name} viewFile={true} />
       <div className="pt-20  mx-auto md:max-w-xl p-3">
-        {Delete &&<div className="relative w-full h-50 z-10 flex justify-center">
+        {Delete && <div className="relative w-full h-50 z-10 flex justify-center">
           <div className="bg-transparent h-fit backdrop-blur-sm border-2 rounded-lg border-sky-400 p-5">
             <p className="text-white text-xl">Want to delete this {fileInfo.type}?</p>
             <div className="flex justify-between">
               <button
-                onClick={()=>setDelete(false)}
+                onClick={() => setDelete(false)}
                 className="cursor-pointer mt-5 w-[40%] flex justify-center bg-green-500 p-2 rounded text-white font-medium text-lg mx-auto"
               >
                 No
@@ -108,9 +125,14 @@ function FileInfo({ fileInfo, fileStack }: any) {
           className="md:max-w-xl cursor-pointer"
         >
           <img
-            className={`mx-auto ${loading ? 'animate-pulse' : ''}`}
+            className={`mx-auto w-[35vw] h-[35vw] md:h-[20vh] rounded-lg object-cover ${loading ? 'animate-pulse' : ''}`}
             width={155}
-            src={file}
+            src={handleFileLogo(fileInfo.name, fileInfo.id)}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.onerror = null;
+              target.src = imgFile;
+            }}
             alt="item"
           />
           {fileData != undefined ? <>
@@ -123,17 +145,17 @@ function FileInfo({ fileInfo, fileStack }: any) {
                 onClick={handleDownload}
                 disabled={loading}
                 className="ms-0 me-0 cursor-pointer mt-5 flex justify-center bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg mx-auto"
-                >
+              >
                 {loading ? <img className="animate-spin" width={25} src={loader} alt="Loading..." /> : <img className="animate-bounce me-2" width={25} src={download} alt="" />}
                 Download
               </button>
               <button
-                  onClick={()=>setDelete(true)}
-                  className="ms-0 me-0  cursor-pointer mt-5 flex justify-center bg-red-500 p-2 rounded text-white font-medium text-lg mx-auto"
-                  >
-                  <img width={25} className={`${Deleting?'animate-spin':''}`} src={Deleting?loader:bin} alt="" />
-                </button>
-              </div>
+                onClick={() => setDelete(true)}
+                className="ms-0 me-0  cursor-pointer mt-5 flex justify-center bg-red-500 p-2 rounded text-white font-medium text-lg mx-auto"
+              >
+                <img width={25} className={`${Deleting ? 'animate-spin' : ''}`} src={Deleting ? loader : bin} alt="" />
+              </button>
+            </div>
           </> :
             <>
               <img className={`animate-spin mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />

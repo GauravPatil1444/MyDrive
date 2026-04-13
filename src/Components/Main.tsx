@@ -11,6 +11,10 @@ import { onAuthStateChanged } from "firebase/auth";
 import FileInfo from "./FileInfo";
 import loader from "../assets/loading.png";
 import loaderLight from "../assets/loading_light.png";
+import zip from "../assets/zip.png";
+import imgFile from "../assets/image-file.png";
+import pdf from "../assets/pdf.png";
+
 
 function Main() {
 
@@ -46,12 +50,12 @@ function Main() {
             window.location.assign("/auth")
         }
         const storageRef = ref(storage, `${JSON.parse(id)}/files/`);
-        console.log("-->", storageRef);
+        // console.log("-->", storageRef);
 
         const res = await listAll(storageRef);
         res.items.forEach(async (itemRef) => {
             const url = await getDownloadURL(itemRef);
-            console.log("File:", itemRef.name, url);
+            // console.log("File:", itemRef.name, url);
             setdata(prev => {
                 const safePrev = Array.isArray(prev) ? prev : [];
                 const updated = [...safePrev, { id: url, type: "file", name: itemRef.name }];
@@ -74,7 +78,7 @@ function Main() {
     }
 
     const chooseFile = (value: string, file: any) => {
-        console.log(file[0]);
+        // console.log(file[0]);
         const name = value.split("\\").pop() || "";
         setfileName(name);
         setfileData(file[0]);
@@ -100,7 +104,7 @@ function Main() {
         const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files${fileStack}/${fileName}`;
         const storageRef = ref(storage, url);
         await uploadBytes(storageRef, fileData).then((snapshot) => {
-            console.log('Data Uploaded!', snapshot);
+            // console.log('Data Uploaded!', snapshot);
         })
         const id = await getDownloadURL(storageRef);
         if (heading == "MyDrive") {
@@ -124,17 +128,17 @@ function Main() {
         setloading(false);
     };
 
-    const listItems = async (res:any) => {
-        res.items.forEach(async (itemRef:any) => {
+    const listItems = async (res: any) => {
+        res.items.forEach(async (itemRef: any) => {
             const url = await getDownloadURL(itemRef);
-            console.log("File:", itemRef.name, url);
+            // console.log("File:", itemRef.name, url);
             setdata(prev => {
                 const updated = [...prev, { id: url, type: "file", name: itemRef.name }];
                 return updated;
             });
         });
 
-        res.prefixes.forEach((folderRef:any) => {
+        res.prefixes.forEach((folderRef: any) => {
             const folderPath = folderRef.fullPath.split('/');
             const folder = folderPath[folderPath.length - 1];
             setdata(prev => {
@@ -146,11 +150,11 @@ function Main() {
 
     const itemClick = async (item: DataType) => {
 
-        if(item.id=="1444"){
-            setheading(item.name.split('/')[item.name.split('/').length-1]);
+        if (item.id == "1444") {
+            setheading(item.name.split('/')[item.name.split('/').length - 1]);
             setdata([]);
             setloading(true);
-            setplaceholder(item.name.split('/')[item.name.split('/').length-1]);
+            setplaceholder(item.name.split('/')[item.name.split('/').length - 1]);
             const storageRef = ref(storage, `${auth.currentUser?.uid}/files${item.name}`);
             const res = await listAll(storageRef);
             await listItems(res);
@@ -158,13 +162,14 @@ function Main() {
             return;
         }
         if (!loading) {
-            // console.log(item);
+            // // console.log(item);
             setheading(item.name);
             if (item.type == "folder") {
                 setdata([]);
                 setloading(true);
                 setplaceholder(item.name);
                 const storageRef = ref(storage, `${heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${item.name}` : `${auth.currentUser?.uid}/files${fileStack}/${item.name}`}`);
+                // console.log(fileStack);
                 const res = await listAll(storageRef);
                 await listItems(res);
                 setloading(false);
@@ -176,33 +181,59 @@ function Main() {
         }
     };
 
+    const handleFileLogo = (name: string, id: string) => {
+        if (name.split('.')[1] == "zip" || name.split('.')[1] == "rar") {
+            return zip;
+        }
+        else if (name.split('.')[1] == "jpg" || name.split('.')[1] == "png" || name.split('.')[1] == "jpeg" || name.split('.')[1] == "webp" || name.split('.')[1] == "avif" || name.split('.')[1] == "gif") {
+            return id;
+        }
+        else if(name.split('.')[1] == "pdf" ){
+            return pdf
+        }
+        else {
+            return file;
+        }
+    }
+
     useEffect(() => {
         if (heading == "MyDrive") {
+            setdata([]);
             setfileStack("");
             setloading(true);
             const stored = localStorage.getItem('data');
             if (stored) {
                 const parsed = JSON.parse(stored);
                 if (Array.isArray(parsed)) {
-                    setdata(parsed);
+                    setTimeout(() => {
+                        if (data !== parsed) {
+                            setdata(parsed);
+                        }
+                    }, 1500);
                 } else {
                     setdata([]);
                 }
             }
             setloading(false);
         }
+        else if (heading == "") {
+            setheading("MyDrive");
+            setplaceholder("MyDrive");
+            setfileStack("");
+        }
         else {
             setfileStack(`${fileStack}/${heading}`)
-            console.log(fileStack);
+            // console.log(fileStack);
         }
     }, [heading])
 
     useEffect(() => {
+        setdata([]);
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                console.log("User is signed in:", user.email);
+                // console.log("User is signed in:", user.email);
             } else {
-                console.log("No user signed in.");
+                // console.log("No user signed in.");
                 window.location.assign('/auth');
             }
         });
@@ -225,7 +256,7 @@ function Main() {
 
     return (
         <>
-            {viewFile ? <FileInfo fileInfo={fileInfo} fileStack={fileStack} /> :
+            {viewFile ? <FileInfo fileInfo={fileInfo} /> :
                 <>
                     <Navbar heading={heading} setheading={setheading} setplaceholder={setplaceholder} itemClick={itemClick} fileStack={fileStack} setfileStack={setfileStack} />
                     <div className="pt-16 mx-auto md:max-w-xl p-3">
@@ -327,8 +358,13 @@ function Main() {
                                         onClick={() => itemClick(item)}
                                     >
                                         <img
-                                            className={`w-[35vw] h-[35vw] md:h-[20vh] ${loading ? "animate-pulse" : ""}`}
-                                            src={item.type === "folder" ? folder : file}
+                                            className={`w-[35vw] h-[35vw] md:h-[20vh] object-cover rounded-lg ${loading ? "animate-pulse" : ""}`}
+                                            src={item.type === "folder" ? folder : handleFileLogo(item.name, item.id)}
+                                            onError={(e) => {
+                                                const target = e.target as HTMLImageElement;
+                                                target.onerror = null;
+                                                target.src = imgFile;
+                                            }}
                                             alt="item"
                                         />
                                         <p className="dark:text-white text-center overflow-hidden text-wrap">{item.name}</p>
