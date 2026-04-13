@@ -1,7 +1,6 @@
 import Add from '../assets/plus.png';
 import bin from "../assets/bin.png";
 import { useState, useEffect, useRef } from 'react';
-import loader from "../assets/loading.png";
 
 interface DataType {
   id: string;

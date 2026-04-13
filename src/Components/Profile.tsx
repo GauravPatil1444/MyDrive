@@ -33,7 +33,7 @@ function Profile() {
     const handleUpload = async () => {
         setloading(true);
         const storageRef = ref(storage, `${auth.currentUser?.uid}/profile/${fileName}`);
-        await uploadBytes(storageRef, fileData).then((snapshot) => {
+        await uploadBytes(storageRef, fileData).then(() => {
             // console.log('Profile Updated!', snapshot);
         })
         await getDownloadURL(storageRef).then(async (url) => {

@@ -103,7 +103,7 @@ function Main() {
         setnewFile(false);
         const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files${fileStack}/${fileName}`;
         const storageRef = ref(storage, url);
-        await uploadBytes(storageRef, fileData).then((snapshot) => {
+        await uploadBytes(storageRef, fileData).then(() => {
             // console.log('Data Uploaded!', snapshot);
         })
         const id = await getDownloadURL(storageRef);
