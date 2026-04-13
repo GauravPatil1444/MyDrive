@@ -18,6 +18,9 @@ function Authentication() {
             const credential = await signInWithEmailAndPassword(auth, email, password);
             // console.log(credential.user);
             localStorage.setItem('user',JSON.stringify(credential.user.uid));
+            if(credential.user.photoURL){
+                localStorage.setItem('profile', credential.user.photoURL);
+            }
             setloading(false);
             window.location.assign('/');
         }

@@ -51,6 +51,7 @@ function Profile() {
     }
 
     const handleLogout = async () => {
+        localStorage.clear();
         await signOut(auth);
         window.location.assign("/auth");
     }
