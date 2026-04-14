@@ -91,6 +91,7 @@ function Navbar({ heading, setheading, setplaceholder, itemClick, fileStack, set
         <Link to={'/'}>
           <p className='text-slate-800 dark:text-white font-medium'>{heading}</p>
         </Link>
+        
       </div>
       <button className='font-medium md:me-10 pe-1 text-slate-800 dark:text-white cursor-pointer' onClick={toggle}>{togglemode ? <img src={light} width={25} alt="Light" /> : <img src={dark} width={25} alt="Dark" />}</button>
     </nav>
