@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import file from "../assets/file.png";
 import Navbar from "./Navbar";
-import { getStorage, getMetadata, ref, deleteObject } from "firebase/storage";
+import { getStorage, getMetadata, ref, deleteObject, getDownloadURL } from "firebase/storage";
 import loader from "../assets/loading.png";
 import loaderLight from "../assets/loading_light.png";
 import download from "../assets/download.png";
@@ -27,20 +27,40 @@ function FileInfo({ fileInfo }: any) {
   const [Deleting, setDeleting] = useState(false);
 
   const handleDownload = async () => {
-    setloading(true);
     const urlObj = new URL(fileInfo.id);
     const path = urlObj.pathname;
     const pathSegment = path.split('/o/')[1];
     const decodedPath = decodeURIComponent(pathSegment);
+    try {
+      const fileRef = ref(storage, decodedPath);
+      const url = await getDownloadURL(fileRef);
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const filename = decodedPath.split('/').pop() || 'downloaded-file';
+      const blobUrl = URL.createObjectURL(blob);
 
-    const a = document.createElement('a');
-    a.href = decodedPath;
-    a.download = fileInfo.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setloading(false);
-  }
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(blobUrl);
+
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('HTTP error! status: 404')) {
+        alert('The requested file does not exist.');
+      } else if (error instanceof Error && error.message.includes('storage/unauthorized')) {
+        alert('You do not have permission to access this file. Check Firebase Storage Security Rules.');
+      } else {
+        alert('An unexpected error occurred during download.');
+      }
+    }
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -125,7 +145,7 @@ function FileInfo({ fileInfo }: any) {
           className="md:max-w-xl cursor-pointer"
         >
           <img
-            className={`mx-auto w-[35vw] h-[35vw] md:h-[20vh] rounded-lg object-cover ${loading ? 'animate-pulse' : ''}`}
+            className={`mx-auto w-[35vw] h-[35vw] md:h-[20vh] rounded-lg object-cover md:object-contain md:object-contain  ${loading ? 'animate-pulse' : ''}`}
             width={155}
             src={handleFileLogo(fileInfo.name, fileInfo.id)}
             onError={(e) => {

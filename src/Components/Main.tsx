@@ -129,24 +129,33 @@ function Main() {
     };
 
     const listItems = async (res: any) => {
-        res.items.forEach(async (itemRef: any) => {
-            const url = await getDownloadURL(itemRef);
-            // console.log("File:", itemRef.name, url);
-            setdata(prev => {
-                const updated = [...prev, { id: url, type: "file", name: itemRef.name }];
-                return updated;
+        try {
+            const filePromises = res.items.map(async (itemRef: any) => {
+                const url = await getDownloadURL(itemRef);
+                return {
+                    id: url,
+                    type: "file",
+                    name: itemRef.name
+                };
             });
-        });
 
-        res.prefixes.forEach((folderRef: any) => {
-            const folderPath = folderRef.fullPath.split('/');
-            const folder = folderPath[folderPath.length - 1];
-            setdata(prev => {
-                const updated = [...prev, { id: folderRef.fullPath, type: "folder", name: folder }];
-                return updated;
+            const files = await Promise.all(filePromises);
+            const folders = res.prefixes.map((folderRef: any) => {
+                const folderPath = folderRef.fullPath.split('/');
+                const folder = folderPath[folderPath.length - 1];
+
+                return {
+                    id: folderRef.fullPath,
+                    type: "folder",
+                    name: folder
+                };
             });
-        });
-    }
+            setdata([...folders, ...files]);
+
+        } catch {
+            // console.error("Error listing items");
+        }
+    };
 
     const itemClick = async (item: DataType) => {
 
@@ -188,7 +197,7 @@ function Main() {
         else if (name.split('.')[1] == "jpg" || name.split('.')[1] == "png" || name.split('.')[1] == "jpeg" || name.split('.')[1] == "webp" || name.split('.')[1] == "avif" || name.split('.')[1] == "gif") {
             return id;
         }
-        else if(name.split('.')[1] == "pdf" ){
+        else if (name.split('.')[1] == "pdf") {
             return pdf
         }
         else {
@@ -358,7 +367,7 @@ function Main() {
                                         onClick={() => itemClick(item)}
                                     >
                                         <img
-                                            className={`w-[35vw] h-[35vw] md:h-[20vh] object-cover rounded-lg ${loading ? "animate-pulse" : ""}`}
+                                            className={`w-[35vw] h-[35vw] md:h-[20vh] object-cover md:object-contain  rounded-lg ${loading ? "animate-pulse" : ""}`}
                                             src={item.type === "folder" ? folder : handleFileLogo(item.name, item.id)}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement;

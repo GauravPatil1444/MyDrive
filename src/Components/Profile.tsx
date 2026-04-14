@@ -99,7 +99,7 @@ function Profile() {
                         <img className="hidden dark:block" src={profileDark} alt="Profile" />
                         <img className="dark:hidden" src={profileLight} alt="Profile" />
                     </> :
-                        <img className="w-full h-full rounded-full object-cover" src={profileimg} alt="Profile" />
+                        <img className="w-full h-full rounded-full object-cover md:object-contain" src={profileimg} alt="Profile" />
                     }
                 </div>
                 <div className="text-center mt-2 flex flex-col gap-2">
