@@ -36,7 +36,7 @@ function Authentication() {
             const credential = await createUserWithEmailAndPassword(auth, email, password);
             const user = credential.user;
             localStorage.setItem('user',JSON.stringify(user.uid));
-            await updateProfile(user, {
+            await updateProfile(user, { 
                 displayName: name,
             });
             setloading(false);
@@ -60,7 +60,7 @@ function Authentication() {
 
     return (
         <>
-            <Navbar heading={"Authentication"} />
+            <Navbar />
             <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-800">
 
                 <p id="font-mea" className="pt-26 p-10 text-6xl font-bold animate-pulse mx-auto bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 bg-clip-text text-transparent ">{isLogin ? "Welcome Back" : "Get Started"}</p>

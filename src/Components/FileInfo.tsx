@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import file from "../assets/file.png";
 import Navbar from "./Navbar";
 import { getStorage, getMetadata, ref, deleteObject, getDownloadURL } from "firebase/storage";
@@ -9,8 +9,9 @@ import bin from "../assets/bin.png"
 import zip from "../assets/zip.png";
 import imgFile from "../assets/image-file.png";
 import pdf from "../assets/pdf.png";
+import { MainContext } from './Main';
 
-function FileInfo({ fileInfo }: any) {
+function FileInfo() {
 
   interface fileData {
     name: string;
@@ -20,6 +21,8 @@ function FileInfo({ fileInfo }: any) {
   }
 
   const storage = getStorage();
+
+  const {fileInfo}:any = useContext(MainContext);
 
   const [fileData, setfileData] = useState<fileData>();
   const [loading, setloading] = useState(false);
@@ -120,7 +123,7 @@ function FileInfo({ fileInfo }: any) {
 
   return (
     <>
-      <Navbar heading={fileInfo.name} viewFile={true} />
+      <Navbar />
       <div className="pt-20  mx-auto md:max-w-xl p-3">
         {Delete && <div className="relative w-full h-50 z-10 flex justify-center">
           <div className="bg-transparent h-fit backdrop-blur-sm border-2 rounded-lg border-sky-400 p-5">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext } from "react";
 import fileIcon from '../assets/fileIcon.png';
 import folderIcon from '../assets/folderIcon.png';
 import folder from '../assets/folder.png';
@@ -15,10 +15,26 @@ import zip from "../assets/zip.png";
 import imgFile from "../assets/image-file.png";
 import pdf from "../assets/pdf.png";
 
+export interface MainContextType {
+  heading: string;
+  setheading: React.Dispatch<React.SetStateAction<string>>;
+  placeholder:string;
+  setplaceholder: React.Dispatch<React.SetStateAction<string>>;
+  itemClick: (item: any) => void;
+  fileStack: string;
+  setfileStack: React.Dispatch<React.SetStateAction<string>>;
+  viewFile: boolean;
+  setviewFile: any;
+  setFilteredData: any;
+  fileInfo: any;
+}
+
+export const MainContext = createContext<MainContextType|null>(null);
 
 function Main() {
 
     const storage = getStorage();
+
 
     interface DataType {
         id: string,
@@ -207,9 +223,9 @@ function Main() {
 
     useEffect(() => {
         if (heading == "MyDrive") {
+            setloading(true);
             setdata([]);
             setfileStack("");
-            setloading(true);
             const stored = localStorage.getItem('data');
             if (stored) {
                 const parsed = JSON.parse(stored);
@@ -264,13 +280,13 @@ function Main() {
     const displayData = filteredData.length > 0 ? filteredData : data;
 
     return (
-        <>
-            {viewFile ? <FileInfo fileInfo={fileInfo} /> :
+        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo }}>
+            <Navbar />
+            {viewFile ? <FileInfo/> :
                 <>
-                    <Navbar heading={heading} setheading={setheading} setplaceholder={setplaceholder} itemClick={itemClick} fileStack={fileStack} setfileStack={setfileStack} />
                     <div className="pt-16 mx-auto md:max-w-xl p-3">
 
-                        <Search data={data} placeholder={placeholder} setFilteredData={setFilteredData} setadd={setadd} />
+                        <Search />
 
                         {loading && <>
                             <img className={`animate-spin mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />
@@ -387,7 +403,7 @@ function Main() {
                     </div>
                 </>}
 
-        </>
+        </MainContext.Provider>
     );
 }
 

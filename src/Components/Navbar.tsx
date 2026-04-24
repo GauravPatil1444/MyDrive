@@ -1,16 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import logo from '../assets/Logo.png';
 import light from '../assets/brightness.png';
 import dark from '../assets/night-mode.png';
 import back from '../assets/back.png';
 import { Link } from "react-router";
 import { useLocation } from "react-router";
+import { MainContext } from './Main';
 
-
-function Navbar({ heading, setheading, setplaceholder, itemClick, fileStack, setfileStack, viewFile }: any) {
+function Navbar() {
 
   const [togglemode, settogglemode] = useState(true);
   const [profile, setprofile] = useState<any>("");
+
+  const {
+    setplaceholder,
+    heading,
+    setheading,
+    fileStack,
+    setfileStack,
+    viewFile,
+    setviewFile,
+    itemClick
+  } = useContext(MainContext) as any;
 
   const location = useLocation();
 
@@ -29,6 +40,7 @@ function Navbar({ heading, setheading, setplaceholder, itemClick, fileStack, set
   const handleBack = () => {
     setheading("MyDrive");
     setplaceholder("MyDrive");
+    setviewFile(false); 
   }
 
   const handleGoback = () => {
@@ -56,7 +68,7 @@ function Navbar({ heading, setheading, setplaceholder, itemClick, fileStack, set
   }, [location])
 
   useEffect(() => {
-    const url:any = localStorage.getItem('profile');
+    const url: any = localStorage.getItem('profile');
     setprofile(url);
   }, [])
 
@@ -78,7 +90,7 @@ function Navbar({ heading, setheading, setplaceholder, itemClick, fileStack, set
         <button className='cursor-pointer' onClick={handleGoback}>
           <img className='md:ms-10 rounded-full w-8 h-8 object-cover'
             width={30}
-            src={heading == "MyDrive" ? profile || logo: heading == "Authentication" ? logo : back}
+            src={heading == "MyDrive" ? profile || logo : heading == "Authentication" ? logo : back}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null;
@@ -91,7 +103,7 @@ function Navbar({ heading, setheading, setplaceholder, itemClick, fileStack, set
         <Link to={'/'}>
           <p className='text-slate-800 dark:text-white font-medium'>{heading}</p>
         </Link>
-        
+
       </div>
       <button className='font-medium md:me-10 pe-1 text-slate-800 dark:text-white cursor-pointer' onClick={toggle}>{togglemode ? <img src={light} width={25} alt="Light" /> : <img src={dark} width={25} alt="Dark" />}</button>
     </nav>

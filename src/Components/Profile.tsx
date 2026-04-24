@@ -10,9 +10,10 @@ import save from "../assets/save.png";
 import exit from "../assets/exit.png";
 import Edit from "../assets/edit.png";
 
+
 function Profile() {
 
-    const storage = getStorage();
+    const storage = getStorage();    
 
     const [name, setname] = useState<string | null | undefined>();
     const [email, setemail] = useState<string | null | undefined>();
@@ -22,6 +23,7 @@ function Profile() {
     const [profileimg, setprofileimg] = useState<any>("");
     const [loading, setloading] = useState(false);
     const [Name, setName] = useState("");
+
 
     const chooseFile = (value: string, file: any) => {
         const name = value.split("\\").pop() || "";
@@ -92,7 +94,7 @@ function Profile() {
 
     return (
         <>
-            <Navbar heading="Profile" />
+            <Navbar/>
             <div className="pt-20">
                 <div className="mx-auto w-32 h-32 rounded-full p-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 ">
                     {profileimg.length == 0 ? <>

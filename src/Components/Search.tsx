@@ -1,24 +1,15 @@
 import Add from '../assets/plus.png';
 import bin from "../assets/bin.png";
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
+import { MainContext } from './Main'
 
-interface DataType {
-  id: string;
-  type: string;
-  name: string;
-}
 
-interface Props {
-  data: DataType[];
-  setFilteredData: (data: DataType[]) => void;
-  setadd: any;
-  placeholder: string;
-}
-
-function Search({ placeholder, data, setFilteredData, setadd }: Props) {
+function Search() {
 
   const [searchInput, setsearchInput] = useState('');
   const [Delete, setDelete] = useState(false);
+
+  const { placeholder, data, setFilteredData, setadd }:any = useContext(MainContext);
 
   const timeoutRef = useRef<any>(null);
 
