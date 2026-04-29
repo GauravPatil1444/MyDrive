@@ -1,6 +1,4 @@
 import { useState, useEffect, createContext } from "react";
-import fileIcon from '../assets/fileIcon.png';
-import folderIcon from '../assets/folderIcon.png';
 import folder from '../assets/folder.png';
 import file from '../assets/file.png';
 import Search from "./Search";
@@ -27,6 +25,17 @@ export interface MainContextType {
   setviewFile: any;
   setFilteredData: any;
   fileInfo: any;
+  setadd: any;
+  add: any;
+  foldername: any;
+  setfoldername: any;
+  newFile: any;
+  uploadbtn: any;
+  newFolder: any;
+  chooseFile: any;
+  handleCreate: any;
+  handleUpload: any;
+  data: any;
 }
 
 export const MainContext = createContext<MainContextType|null>(null);
@@ -277,10 +286,10 @@ function Main() {
     }, []);
 
 
-    const displayData = filteredData.length > 0 ? filteredData : data;
+    let displayData = filteredData.length > 0 ? filteredData : data;
 
     return (
-        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo }}>
+        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo, setadd, newFile, foldername, setfoldername, add, handleUpload, chooseFile, handleCreate, newFolder, uploadbtn, data  }}>
             <Navbar />
             {viewFile ? <FileInfo/> :
                 <>
@@ -289,93 +298,12 @@ function Main() {
                         <Search />
 
                         {loading && <>
-                            <img className={`animate-spin mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />
-                            <img className={`animate-spin mx-auto dark:hidden`} width={45} src={loaderLight} alt="Loading..." />
+                            <img className={`animate-spin mt-15 mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />
+                            <img className={`animate-spin mt-15 mx-auto dark:hidden`} width={45} src={loaderLight} alt="Loading..." />
                         </>}
 
-                        {add && <div className="btn-group justify-center flex gap-2">
-                            <button
-                                className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-lg"
-                                onClick={() => { setnewFile(true); setnewFolder(false); }}
-                            >
-                                <img height={15} width={25} src={fileIcon} alt="file" />
-                                Upload file
-                            </button>
-
-                            <button
-                                className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-lg"
-                                onClick={() => { setnewFile(false); setnewFolder(true); }}
-                            >
-                                <img width={25} height={20} src={folderIcon} alt="folder" />
-                                Create folder
-                            </button>
-                        </div>}
-
-                        {newFile && (
-                            <div className="p-3">
-                                <label
-                                    className="flex justify-center flex-col w-full h-32 px-4 border-2 border-sky-400 border-dashed rounded-md cursor-pointer"
-                                    onDragOver={(e) => e.preventDefault()}
-                                    onDrop={(e) => {
-                                        e.preventDefault();
-
-                                        const file = e.dataTransfer.files[0];
-                                        if (file) {
-                                            setfileName(file.name);
-                                            setuploadbtn(true);
-                                        }
-                                    }}>
-
-                                    <span className="flex bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 bg-clip-text text-transparent justify-center space-x-2">
-                                        <span className="font-medium flex gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} > <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /> </svg>
-                                            Drop files or browse
-                                        </span>
-                                    </span>
-
-                                    <input
-                                        type="file"
-                                        className="hidden"
-                                        onChange={(e) => chooseFile(e.target.value, e.target.files)}
-                                    />
-
-                                    {fileName && (
-                                        <p className="mt-2 text-center text-sky-400">{fileName}</p>
-                                    )}
-                                </label>
-
-                                {uploadbtn && (
-                                    <button
-                                        className="mx-auto mt-3 cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium"
-                                        onClick={() => handleUpload()}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} > <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /> </svg>
-                                        Upload
-                                    </button>
-                                )}
-                            </div>
-                        )}
-
-                        {newFolder && (
-                            <div className="flex gap-2 justify-center mt-10">
-                                <input
-                                    value={foldername}
-                                    onChange={(e) => setfoldername(e.target.value)}
-                                    type="text"
-                                    placeholder="Enter folder name"
-                                    className="p-2 border border-sky-400 rounded outline-0 dark:text-white"
-                                />
-                                <button
-                                    className="cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium"
-                                    onClick={() => handleCreate(crypto.randomUUID(), "folder", foldername)}
-                                >
-                                    Create
-                                </button>
-                            </div>
-                        )}
-
                         {displayData.length > 0 ? (
-                            <div className="w-full flex mt-10 flex-wrap gap-5 justify-center overflow-y-scroll max-h-[80vh] md:max-h-[70vh]">
+                            <div className={`w-full flex mt-15 flex-wrap gap-5 justify-center overflow-y-scroll max-h-[${window.screen.height}] md:max-h-[70vh]`}>
                                 {displayData.map((item) => (
                                     <div
                                         key={item.id}
