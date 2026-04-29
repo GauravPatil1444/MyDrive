@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "./Navbar";
+import Navbar from "./Navbar2";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from '../../firebaseConfig'
 import loader from '../assets/loading.png'
@@ -60,7 +60,7 @@ function Authentication() {
 
     return (
         <>
-            <Navbar />
+            <Navbar heading={isLogin?"Welcome Back!":"Get Started"}/>
             <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-slate-800">
 
                 <p id="font-mea" className="pt-26 p-10 text-6xl font-bold animate-pulse mx-auto bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 bg-clip-text text-transparent ">{isLogin ? "Welcome Back" : "Get Started"}</p>

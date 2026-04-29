@@ -1,4 +1,4 @@
-import Navbar from "./Navbar"
+import Navbar from "./Navbar2"
 import profileDark from "../assets/profile-dark.png"
 import profileLight from '../assets/profile-light.png'
 import { auth } from "../../firebaseConfig"
@@ -94,7 +94,7 @@ function Profile() {
 
     return (
         <>
-            <Navbar/>
+            <Navbar heading={"Profile"}/>
             <div className="pt-20">
                 <div className="mx-auto w-32 h-32 rounded-full p-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 ">
                     {profileimg.length == 0 ? <>
