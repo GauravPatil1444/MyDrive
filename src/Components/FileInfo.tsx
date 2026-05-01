@@ -160,7 +160,7 @@ function FileInfo() {
           />
           {fileData != undefined ? <>
             <p className="dark:text-white text-center text-wrap text-lg">{fileInfo.name}</p>
-            <p className="text-center text-gray-600 dark:text-gray-300 text-lg">{(fileData.size / 1000) > 1000 ? `${((fileData.size / 1000) / 1000)} MB` : `${(fileData.size / 1000)} KB`}</p>
+            <p className="text-center text-gray-600 dark:text-gray-300 text-lg">{(fileData.size / 1000) > 1000 ? `${(Math.round((fileData.size / 1000) / 1000))} MB` : `${Math.round((fileData.size / 1000))} KB`}</p>
             <p className="text-gray-500 dark:text-gray-400 text-center text-wrap">{`${fileData.timeCreated.split('T')[0].split('-')[2]}-${fileData.timeCreated.split('T')[0].split('-')[1]}-${fileData.timeCreated.split('T')[0].split('-')[0]}`}</p>
             <p className="text-gray-500 dark:text-gray-400 text-center text-wrap">{fileData.contentType}</p>
             <div className="flex justify-center gap-2">

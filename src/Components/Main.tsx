@@ -44,7 +44,6 @@ function Main() {
 
     const storage = getStorage();
 
-
     interface DataType {
         id: string,
         type: string,
@@ -124,6 +123,8 @@ function Main() {
     };
 
     const handleUpload = async () => {
+        console.log(200);
+        
         setloading(true);
         setnewFile(false);
         const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files${fileStack}/${fileName}`;

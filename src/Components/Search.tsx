@@ -8,7 +8,7 @@ import folderIcon from '../assets/folderIcon.png';
 function Search() {
   const [searchInput, setsearchInput] = useState("");
   const [Delete, setDelete] = useState(false);
-
+  
   const { 
       placeholder,
       data,
@@ -108,8 +108,7 @@ function Search() {
               Do you Want to delete {placeholder}?
             </p>
             <p className="text-white text-lg text-wrap">
-              Inorder to delete it from cloud you need to delete all its
-              contents.
+              Inorder to delete it from cloud you need to delete all its contents.
             </p>
             <div className="flex">
               <button

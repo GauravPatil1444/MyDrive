@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import logo from '../assets/Logo.png';
 import light from '../assets/brightness.png';
 import dark from '../assets/night-mode.png';
@@ -21,6 +21,17 @@ function Navbar({heading}:any) {
     }
     settogglemode(!togglemode);
   }
+
+  useEffect(() => {
+    const theme = localStorage.getItem('theme');
+    if(theme=="dark"){
+      settogglemode(true);
+    }
+    else{
+      settogglemode(false);
+    }
+  }, [])
+  
 
 
   return (
