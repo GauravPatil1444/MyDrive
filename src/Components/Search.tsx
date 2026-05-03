@@ -28,6 +28,7 @@ function Search() {
       setfoldername,
       foldername,
       handleCreate,
+      loading
     }: any = useContext(MainContext);
 
   const timeoutRef = useRef<any>(null);
@@ -128,7 +129,7 @@ function Search() {
         </div>
       )}
 
-      {add && (
+      {add && !loading &&(
         <div className="btn-group mb-2 justify-center flex gap-2">
           <button
             className="cursor-pointer flex gap-1 bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white text-lg"

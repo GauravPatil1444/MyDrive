@@ -9,6 +9,13 @@ import bin from "../assets/bin.png"
 import zip from "../assets/zip.png";
 import imgFile from "../assets/image-file.png";
 import pdf from "../assets/pdf.png";
+import pokeball from '../assets/pokeball.png';
+import pkmn1 from '../assets/pkmn1.png';
+import pkmn2 from '../assets/pkmn2.png';
+import pkmn3 from '../assets/pkmn3.png';
+import pkmn4 from '../assets/pkmn4.png';
+import pkmn5 from '../assets/pkmn5.png';
+import pkmn6 from '../assets/pkmn6.png';
 import { MainContext } from './Main';
 
 function FileInfo() {
@@ -22,7 +29,7 @@ function FileInfo() {
 
   const storage = getStorage();
 
-  const {fileInfo}:any = useContext(MainContext);
+  const { fileInfo }: any = useContext(MainContext);
 
   const [fileData, setfileData] = useState<fileData>();
   const [loading, setloading] = useState(false);
@@ -92,6 +99,8 @@ function FileInfo() {
   }
 
   const handleFileLogo = (name: string, id: string) => {
+    console.log(`../assets/pkmn${Math.floor(Math.random() * (6 - 1 + 1)) + 1}.png`);
+
     if (name.split('.')[1] == "zip" || name.split('.')[1] == "rar") {
       return zip;
     }
@@ -100,6 +109,13 @@ function FileInfo() {
     }
     else if (name.split('.')[1] == "pdf") {
       return pdf
+    }
+    else if (name.split('.')[1] == "gbc" || name.split('.')[1] == "gba" || name.split('.')[1] == "nds") {
+      return pokeball
+    }
+    else if (name.split('.')[1] == "sav") {
+      const pkmnImages = [pkmn1, pkmn2, pkmn3, pkmn4, pkmn5, pkmn6];
+      return pkmnImages[Math.floor(Math.random() * pkmnImages.length)];
     }
     else {
       return file;
