@@ -37,6 +37,8 @@ export interface MainContextType {
   handleCreate: any;
   handleUpload: any;
   data: any;
+  setnewFolder: any;
+  setnewFile: any;
 }
 
 export const MainContext = createContext<MainContextType|null>(null);
@@ -294,7 +296,7 @@ function Main() {
     let displayData = filteredData.length > 0 ? filteredData : data;
 
     return (
-        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo, setadd, newFile, foldername, setfoldername, add, handleUpload, chooseFile, handleCreate, newFolder, uploadbtn, data  }}>
+        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo, setadd, newFile, foldername, setfoldername, add, handleUpload, chooseFile, handleCreate, newFolder, uploadbtn, data, setnewFolder, setnewFile}}>
             <Navbar />
             {viewFile ? <FileInfo/> :
                 <>
