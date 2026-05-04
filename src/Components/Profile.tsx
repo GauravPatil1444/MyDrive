@@ -24,7 +24,6 @@ function Profile() {
     const [loading, setloading] = useState(false);
     const [Name, setName] = useState("");
 
-
     const chooseFile = (value: string, file: any) => {
         const name = value.split("\\").pop() || "";
         setfileName(name);
@@ -123,12 +122,7 @@ function Profile() {
                         <img width={25} src={exit} alt="" />
                         Logout
                     </button>
-                    {/* <button
-                        className="cursor-pointer bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg"
-                        onClick={handleLogout}
-                    >
-                        Sync Data
-                    </button> */}
+                   
                 </div>
                 {edit && (
                     <div className="p-3 flex flex-col align-center">

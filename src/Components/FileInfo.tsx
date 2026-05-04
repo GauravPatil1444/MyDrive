@@ -1,22 +1,12 @@
 import { useEffect, useState, useContext } from "react";
-import file from "../assets/file.png";
 import Navbar from "./Navbar";
 import { getStorage, getMetadata, ref, deleteObject, getDownloadURL } from "firebase/storage";
 import loader from "../assets/loading.png";
 import loaderLight from "../assets/loading_light.png";
 import download from "../assets/download.png";
 import bin from "../assets/bin.png"
-import zip from "../assets/zip.png";
 import imgFile from "../assets/image-file.png";
-import pdf from "../assets/pdf.png";
-import pokeball from '../assets/pokeball.png';
-import pkmn1 from '../assets/pkmn1.png';
-import pkmn2 from '../assets/pkmn2.png';
-import pkmn3 from '../assets/pkmn3.png';
-import pkmn4 from '../assets/pkmn4.png';
-import pkmn5 from '../assets/pkmn5.png';
-import pkmn6 from '../assets/pkmn6.png';
-import { MainContext } from './Main';
+import { MainContext, useFileLogo } from './Main';
 
 function FileInfo() {
 
@@ -35,42 +25,68 @@ function FileInfo() {
   const [loading, setloading] = useState(false);
   const [Delete, setDelete] = useState(false);
   const [Deleting, setDeleting] = useState(false);
+  const [downloadProgress, setdownloadProgress] = useState<number>();
 
   const handleDownload = async () => {
-    const urlObj = new URL(fileInfo.id);
-    const path = urlObj.pathname;
-    const pathSegment = path.split('/o/')[1];
-    const decodedPath = decodeURIComponent(pathSegment);
+    setdownloadProgress(0);
     try {
-      const fileRef = ref(storage, decodedPath);
-      const url = await getDownloadURL(fileRef);
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const blob = await response.blob();
-      const filename = decodedPath.split('/').pop() || 'downloaded-file';
-      const blobUrl = URL.createObjectURL(blob);
+        const urlObj = new URL(fileInfo.id);
+        const path = urlObj.pathname;
+        const pathSegment = path.split('/o/')[1];
+        const decodedPath = decodeURIComponent(pathSegment);
+        const fileRef = ref(storage, decodedPath);
 
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+        const downloadURL = await getDownloadURL(fileRef);
 
-      URL.revokeObjectURL(blobUrl);
+        const xhr = new XMLHttpRequest();
+        xhr.responseType = 'blob';
+
+        xhr.onprogress = (event) => {
+            if (event.lengthComputable) {
+                const percentComplete = (event.loaded / event.total) * 100;
+                // console.log('Download is ' + percentComplete + '% done');
+                setdownloadProgress(Math.round(percentComplete))
+            }
+        };
+
+        xhr.onload = () => {
+            if (xhr.status === 200) { 
+                const blob = xhr.response;
+                const filename = decodedPath.split('/').pop() || 'downloaded-file';
+                const blobUrl = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a); 
+
+                URL.revokeObjectURL(blobUrl); 
+                // console.log('Download complete!');
+            } else {
+                // console.error(`HTTP error! status: ${xhr.status}`);
+            }
+        };
+
+        xhr.onerror = () => {
+            console.error("Network error during download.");
+            alert('A network error occurred during download.');
+        };
+        xhr.onabort = () => {
+            console.log("Download aborted.");
+            alert('Download aborted.');
+        };
+        xhr.open('GET', downloadURL);
+        xhr.send();
 
     } catch (error) {
-      if (error instanceof Error && error.message.includes('HTTP error! status: 404')) {
-        alert('The requested file does not exist.');
-      } else if (error instanceof Error && error.message.includes('storage/unauthorized')) {
-        alert('You do not have permission to access this file. Check Firebase Storage Security Rules.');
-      } else {
-        alert('An unexpected error occurred during download.');
-      }
+      // console.error("Error during download process:", error);
     }
-  };
+    finally{
+      setdownloadProgress(undefined);
+    }
+};
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -97,31 +113,7 @@ function FileInfo() {
     setDeleting(false);
     window.location.assign("/");
   }
-
-  const handleFileLogo = (name: string, id: string) => {
-    console.log(`../assets/pkmn${Math.floor(Math.random() * (6 - 1 + 1)) + 1}.png`);
-
-    if (name.split('.')[1] == "zip" || name.split('.')[1] == "rar") {
-      return zip;
-    }
-    else if (name.split('.')[1] == "jpg" || name.split('.')[1] == "png" || name.split('.')[1] == "jpeg" || name.split('.')[1] == "webp" || name.split('.')[1] == "avif" || name.split('.')[1] == "gif") {
-      return id;
-    }
-    else if (name.split('.')[1] == "pdf") {
-      return pdf
-    }
-    else if (name.split('.')[1] == "gbc" || name.split('.')[1] == "gba" || name.split('.')[1] == "nds") {
-      return pokeball
-    }
-    else if (name.split('.')[1] == "sav") {
-      const pkmnImages = [pkmn1, pkmn2, pkmn3, pkmn4, pkmn5, pkmn6];
-      return pkmnImages[Math.floor(Math.random() * pkmnImages.length)];
-    }
-    else {
-      return file;
-    }
-  }
-
+  
   useEffect(() => {
     setloading(true);
     const urlObj = new URL(fileInfo.id);
@@ -166,7 +158,7 @@ function FileInfo() {
           <img
             className={`mx-auto w-[35vw] h-[35vw] md:h-[20vh] rounded-lg object-cover md:object-contain md:object-contain  ${loading ? 'animate-pulse' : ''}`}
             width={155}
-            src={handleFileLogo(fileInfo.name, fileInfo.id)}
+            src={useFileLogo(fileInfo.name, fileInfo.id)}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.onerror = null;
@@ -186,7 +178,7 @@ function FileInfo() {
                 className="ms-0 me-0 cursor-pointer mt-5 flex justify-center bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg mx-auto"
               >
                 {loading ? <img className="animate-spin" width={25} src={loader} alt="Loading..." /> : <img className="animate-bounce me-2" width={25} src={download} alt="" />}
-                Download
+                {downloadProgress==undefined?"Download":downloadProgress==100?"Downloaded":`Downloading...${downloadProgress} %`}
               </button>
               <button
                 onClick={() => setDelete(true)}

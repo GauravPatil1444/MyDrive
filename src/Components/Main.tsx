@@ -10,7 +10,7 @@ import pkmn6 from '../assets/pkmn6.png';
 import file from '../assets/file.png';
 import Search from "./Search";
 import Navbar from "./Navbar";
-import { getStorage, ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage';
+import { getStorage, ref, uploadBytesResumable, listAll, getDownloadURL } from 'firebase/storage';
 import { auth } from "../../firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 import FileInfo from "./FileInfo";
@@ -52,6 +52,29 @@ export interface MainContextType {
 
 export const MainContext = createContext<MainContextType|null>(null);
 
+export const useFileLogo = (name: string, id: string) => {
+        
+    if (name.split('.')[1] == "zip" || name.split('.')[1] == "rar") {
+        return zip;
+    }
+    else if (name.split('.')[1] == "jpg" || name.split('.')[1] == "png" || name.split('.')[1] == "jpeg" || name.split('.')[1] == "webp" || name.split('.')[1] == "avif" || name.split('.')[1] == "gif") {
+        return id;
+    }
+    else if (name.split('.')[1] == "pdf") {
+        return pdf
+    }
+    else if (name.split('.')[1] == "gbc" || name.split('.')[1] == "gba" || name.split('.')[1] == "nds") {
+        return pokeball
+    }
+    else if (name.split('.')[1] == "sav") {
+        const pkmnImages = [pkmn1, pkmn2, pkmn3, pkmn4, pkmn5, pkmn6];
+        return pkmnImages[Math.floor(Math.random() * pkmnImages.length)];
+    }
+    else {
+        return file;
+    }
+}
+
 function Main() {
 
     const storage = getStorage();
@@ -77,6 +100,7 @@ function Main() {
     const [fileInfo, setfileInfo] = useState<DataType>();
     const [viewFile, setviewFile] = useState(false);
     const [fileStack, setfileStack] = useState("");
+    const [uploadProgress, setuploadProgress] = useState<number>();
 
 
     const syncData = async () => {
@@ -134,37 +158,54 @@ function Main() {
         setfoldername("");
     };
 
+
     const handleUpload = async () => {
-        console.log(200);
-        
+        // console.log(200);
         setloading(true);
         setnewFile(false);
         const url = heading == "MyDrive" ? `${auth.currentUser?.uid}/files/${fileName}` : `${auth.currentUser?.uid}/files${fileStack}/${fileName}`;
         const storageRef = ref(storage, url);
-        await uploadBytes(storageRef, fileData).then(() => {
-            // console.log('Data Uploaded!', snapshot);
-        })
-        const id = await getDownloadURL(storageRef);
-        if (heading == "MyDrive") {
-            setdata(prev => {
-                const safePrev = Array.isArray(prev) ? prev : [];
-                const updated = [...safePrev, { id: id, type: "file", name: fileName }];
-                localStorage.setItem('data', JSON.stringify(updated));
-                return updated;
-            });
-        }
-        else {
-            setdata(prev => {
-                const safePrev = Array.isArray(prev) ? prev : [];
-                const updated = [...safePrev, { id: id, type: "file", name: fileName }];
-                return updated;
-            });
-        }
-        setadd(false);
-        setfileName("");
-        setuploadbtn(false);
-        setloading(false);
+
+        const uploadTask = uploadBytesResumable(storageRef, fileData);
+
+        uploadTask.on('state_changed',
+            (snapshot) => {
+
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                // console.log('Upload is ' + Math.round(progress) + '% done');
+                setuploadProgress(Math.round(progress));
+            },
+            (error) => {
+                // console.error("Upload failed:", error);
+                setloading(false);
+            },
+            async () => {
+                // console.log('Upload complete!');
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+                if (heading == "MyDrive") {
+                    setdata(prev => {
+                        const safePrev = Array.isArray(prev) ? prev : [];
+                        const updated = [...safePrev, { id: downloadURL, type: "file", name: fileName }];
+                        localStorage.setItem('data', JSON.stringify(updated));
+                        return updated;
+                    });
+                }
+                else {
+                    setdata(prev => {
+                        const safePrev = Array.isArray(prev) ? prev : [];
+                        const updated = [...safePrev, { id: downloadURL, type: "file", name: fileName }];
+                        return updated;
+                    });
+                }
+                setadd(false);
+                setfileName("");
+                setuploadbtn(false);
+                setloading(false);
+            }
+        );
     };
+
 
     const listItems = async (res: any) => {
         try {
@@ -227,30 +268,6 @@ function Main() {
             }
         }
     };
-
-    const handleFileLogo = (name: string, id: string) => {
-        console.log(`../assets/pkmn${Math.floor(Math.random() * (6 - 1 + 1)) + 1}.png`);
-        
-        if (name.split('.')[1] == "zip" || name.split('.')[1] == "rar") {
-            return zip;
-        }
-        else if (name.split('.')[1] == "jpg" || name.split('.')[1] == "png" || name.split('.')[1] == "jpeg" || name.split('.')[1] == "webp" || name.split('.')[1] == "avif" || name.split('.')[1] == "gif") {
-            return id;
-        }
-        else if (name.split('.')[1] == "pdf") {
-            return pdf
-        }
-        else if (name.split('.')[1] == "gbc" || name.split('.')[1] == "gba" || name.split('.')[1] == "nds") {
-            return pokeball
-        }
-        else if (name.split('.')[1] == "sav") {
-            const pkmnImages = [pkmn1, pkmn2, pkmn3, pkmn4, pkmn5, pkmn6];
-            return pkmnImages[Math.floor(Math.random() * pkmnImages.length)];
-        }
-        else {
-            return file;
-        }
-    }
 
     useEffect(() => {
         if (heading == "MyDrive") {
@@ -322,6 +339,7 @@ function Main() {
                         {loading && <>
                             <img className={`animate-spin mt-15 mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />
                             <img className={`animate-spin mt-15 mx-auto dark:hidden`} width={45} src={loaderLight} alt="Loading..." />
+                            <p className="flex bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 bg-clip-text text-transparent justify-center space-x-2 mt-5">Uploading...{uploadProgress} %</p>
                         </>}
 
                         {displayData.length > 0 ? (
@@ -334,7 +352,7 @@ function Main() {
                                     >
                                         <img
                                             className={`w-[35vw] h-[35vw] md:h-[20vh] object-cover md:object-contain  rounded-lg ${loading ? "animate-pulse" : ""}`}
-                                            src={item.type === "folder" ? folder : handleFileLogo(item.name, item.id)}
+                                            src={item.type === "folder" ? folder : useFileLogo(item.name, item.id)}
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement;
                                                 target.onerror = null;
