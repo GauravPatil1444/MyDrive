@@ -175,7 +175,7 @@ function Main() {
                 // console.log('Upload is ' + Math.round(progress) + '% done');
                 setuploadProgress(Math.round(progress));
             },
-            (error) => {
+            () => {
                 // console.error("Upload failed:", error);
                 setloading(false);
             },
@@ -339,7 +339,7 @@ function Main() {
                         {loading && <>
                             <img className={`animate-spin mt-15 mx-auto hidden dark:block`} width={45} src={loader} alt="Loading..." />
                             <img className={`animate-spin mt-15 mx-auto dark:hidden`} width={45} src={loaderLight} alt="Loading..." />
-                            <p className="flex bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 bg-clip-text text-transparent justify-center space-x-2 mt-5">Uploading...{uploadProgress} %</p>
+                            <p className="flex bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 bg-clip-text text-transparent justify-center space-x-2 mt-5">{uploadProgress!=undefined&&`Uploading...${uploadProgress} %`}</p>
                         </>}
 
                         {displayData.length > 0 ? (
