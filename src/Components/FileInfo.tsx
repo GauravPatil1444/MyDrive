@@ -135,7 +135,7 @@ function FileInfo() {
       <div className="pt-20  mx-auto md:max-w-xl p-3">
         {Delete && <div className="relative w-full h-50 z-10 flex justify-center">
           <div className="bg-transparent h-fit backdrop-blur-sm border-2 rounded-lg border-sky-400 p-5">
-            <p className="text-white text-xl">Want to delete this {fileInfo.type}?</p>
+            <p className="dark:text-white text-xl">Want to delete this {fileInfo.type}?</p>
             <div className="flex justify-between">
               <button
                 onClick={() => setDelete(false)}
