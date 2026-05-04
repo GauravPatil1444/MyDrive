@@ -1,12 +1,5 @@
 import { useState, useEffect, createContext } from "react";
 import folder from '../assets/folder.png';
-import pokeball from '../assets/pokeball.png';
-import pkmn1 from '../assets/pkmn1.png';
-import pkmn2 from '../assets/pkmn2.png';
-import pkmn3 from '../assets/pkmn3.png';
-import pkmn4 from '../assets/pkmn4.png';
-import pkmn5 from '../assets/pkmn5.png';
-import pkmn6 from '../assets/pkmn6.png';
 import file from '../assets/file.png';
 import Search from "./Search";
 import Navbar from "./Navbar";
@@ -62,13 +55,6 @@ export const useFileLogo = (name: string, id: string) => {
     }
     else if (name.split('.')[1] == "pdf") {
         return pdf
-    }
-    else if (name.split('.')[1] == "gbc" || name.split('.')[1] == "gba" || name.split('.')[1] == "nds") {
-        return pokeball
-    }
-    else if (name.split('.')[1] == "sav") {
-        const pkmnImages = [pkmn1, pkmn2, pkmn3, pkmn4, pkmn5, pkmn6];
-        return pkmnImages[Math.floor(Math.random() * pkmnImages.length)];
     }
     else {
         return file;
