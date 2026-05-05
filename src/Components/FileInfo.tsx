@@ -5,6 +5,8 @@ import loader from "../assets/loading.png";
 import loaderLight from "../assets/loading_light.png";
 import download from "../assets/download.png";
 import bin from "../assets/bin.png"
+import share from "../assets/share.png";
+import check from "../assets/check.png";
 import imgFile from "../assets/image-file.png";
 import { MainContext, useFileLogo } from './Main';
 
@@ -26,6 +28,7 @@ function FileInfo() {
   const [Delete, setDelete] = useState(false);
   const [Deleting, setDeleting] = useState(false);
   const [downloadProgress, setdownloadProgress] = useState<number>();
+  const [fileShare, setfileShare] = useState(false);
 
   const handleDownload = async () => {
     setdownloadProgress(0);
@@ -37,7 +40,7 @@ function FileInfo() {
         const fileRef = ref(storage, decodedPath);
 
         const downloadURL = await getDownloadURL(fileRef);
-
+        // console.log(downloadURL);
         const xhr = new XMLHttpRequest();
         xhr.responseType = 'blob';
 
@@ -54,7 +57,7 @@ function FileInfo() {
                 const blob = xhr.response;
                 const filename = decodedPath.split('/').pop() || 'downloaded-file';
                 const blobUrl = URL.createObjectURL(blob);
-
+                
                 const a = document.createElement('a');
                 a.href = blobUrl;
                 a.download = filename;
@@ -113,6 +116,22 @@ function FileInfo() {
     setDeleting(false);
     window.location.assign("/");
   }
+
+  const handleShare = async()=>{
+    const urlObj = new URL(fileInfo.id);
+    const path = urlObj.pathname;
+    const pathSegment = path.split('/o/')[1];
+    const decodedPath = decodeURIComponent(pathSegment);
+    const fileRef = ref(storage, decodedPath);
+    const downloadURL = await getDownloadURL(fileRef);
+    setfileShare(true);
+    navigator.clipboard.writeText(downloadURL);
+    // console.log(downloadURL);
+    
+    setTimeout(() => {
+      setfileShare(false);
+    }, 2500);
+  }
   
   useEffect(() => {
     setloading(true);
@@ -152,6 +171,13 @@ function FileInfo() {
             </div>
           </div>
         </div>}
+        {fileShare && <div className="relative w-full h-50 z-10 flex justify-center">
+          <div className="bg-transparent h-fit backdrop-blur-sm border-2 rounded-lg border-sky-400 p-5">
+            <p className="flex gap-2 dark:text-white text-xl">Link is copied to clipboard!
+              <img width={25} src={check} alt="" />
+            </p>
+          </div>
+        </div>}
         <div
           className="md:max-w-xl cursor-pointer"
         >
@@ -174,7 +200,7 @@ function FileInfo() {
             <div className="flex justify-center gap-2">
               <button
                 onClick={handleDownload}
-                disabled={loading}
+                disabled={downloadProgress!=undefined}
                 className="ms-0 me-0 cursor-pointer mt-5 flex justify-center bg-linear-to-r from-blue-400 via-blue-400 to-purple-400 p-2 rounded text-white font-medium text-lg mx-auto"
               >
                 {loading ? <img className="animate-spin" width={25} src={loader} alt="Loading..." /> : <img className="animate-bounce me-2" width={25} src={download} alt="" />}
@@ -185,6 +211,12 @@ function FileInfo() {
                 className="ms-0 me-0  cursor-pointer mt-5 flex justify-center bg-red-500 p-2 rounded text-white font-medium text-lg mx-auto"
               >
                 <img width={25} className={`${Deleting ? 'animate-spin' : ''}`} src={Deleting ? loader : bin} alt="" />
+              </button>
+              <button
+                onClick={handleShare}
+                className="ms-0 me-0  cursor-pointer mt-5 flex justify-center bg-blue-400 p-2 rounded text-white font-medium text-lg mx-auto"
+              >
+                <img width={25} src={share} alt="Share" />
               </button>
             </div>
           </> :

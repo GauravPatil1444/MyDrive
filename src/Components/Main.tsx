@@ -310,18 +310,8 @@ function Main() {
                 window.location.assign('/auth');
             }
         });
-        const stored = localStorage.getItem('data');
-        if (stored) {
-            const parsed = JSON.parse(stored);
-            if (Array.isArray(parsed)) {
-                setdata(parsed);
-            } else {
-                setdata([]);
-            }
-        }
-        else {
-            syncData();
-        }
+
+        syncData();
     }, []);
 
 
