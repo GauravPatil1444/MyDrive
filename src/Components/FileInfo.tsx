@@ -40,14 +40,29 @@ function FileInfo() {
         const fileRef = ref(storage, decodedPath);
 
         const downloadURL = await getDownloadURL(fileRef);
-        // console.log(downloadURL);
+        const filename = decodedPath.split('/').pop() || 'downloaded-file';
+        
+        if (window && (window as any).ReactNativeWebView) {
+          (window as any).ReactNativeWebView.postMessage(
+            JSON.stringify({
+              type: "DOWNLOAD_FILE",
+              url: downloadURL,
+              filename: filename,
+            })
+          );
+          
+          setdownloadProgress(100);
+
+          setTimeout(() => setdownloadProgress(undefined), 2000); 
+          return; 
+        }
+
         const xhr = new XMLHttpRequest();
         xhr.responseType = 'blob';
 
         xhr.onprogress = (event) => {
             if (event.lengthComputable) {
                 const percentComplete = (event.loaded / event.total) * 100;
-                // console.log('Download is ' + percentComplete + '% done');
                 setdownloadProgress(Math.round(percentComplete))
             }
         };
@@ -55,7 +70,6 @@ function FileInfo() {
         xhr.onload = () => {
             if (xhr.status === 200) { 
                 const blob = xhr.response;
-                const filename = decodedPath.split('/').pop() || 'downloaded-file';
                 const blobUrl = URL.createObjectURL(blob);
                 
                 const a = document.createElement('a');
@@ -66,7 +80,6 @@ function FileInfo() {
                 document.body.removeChild(a); 
 
                 URL.revokeObjectURL(blobUrl); 
-                // console.log('Download complete!');
             } else {
                 // console.error(`HTTP error! status: ${xhr.status}`);
             }
@@ -97,7 +110,6 @@ function FileInfo() {
 
     const data: any = localStorage.getItem('data');
     const parsed = await JSON.parse(data);
-    // console.log(parsed);
     const filteredData = await parsed.filter((item: any) => {
       return item.id !== fileInfo.id;
     })
@@ -126,7 +138,6 @@ function FileInfo() {
     const downloadURL = await getDownloadURL(fileRef);
     setfileShare(true);
     navigator.clipboard.writeText(downloadURL);
-    // console.log(downloadURL);
     
     setTimeout(() => {
       setfileShare(false);
