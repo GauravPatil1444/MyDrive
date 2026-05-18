@@ -6,6 +6,7 @@ import back from '../assets/back.png';
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 import { MainContext } from './Main';
+import syncIcon from "../assets/loop.png";
 
 function Navbar() {
 
@@ -20,7 +21,9 @@ function Navbar() {
     setfileStack,
     viewFile,
     setviewFile,
-    itemClick
+    itemClick,
+    sync,
+    setsync
   } = useContext(MainContext) as any;
 
   const location = useLocation();
@@ -105,7 +108,10 @@ function Navbar() {
         </Link>
 
       </div>
-      <button className='font-medium md:me-10 pe-1 text-slate-800 dark:text-white cursor-pointer' onClick={toggle}>{togglemode ? <img src={light} width={25} alt="Light" /> : <img src={dark} width={25} alt="Dark" />}</button>
+      <div className="btn-group flex">
+        <button className='absolute right-10 top-3 md:me-10 pe-5 cursor-pointer' onClick={()=>setsync(true)}>{<img className={sync&&`animate-spin`} src={syncIcon} width={30} alt="sync" />}</button>     
+        <button className='font-medium md:me-10 pe-1 cursor-pointer' onClick={toggle}>{togglemode ? <img src={light} width={25} alt="Light" /> : <img src={dark} width={25} alt="Dark" />}</button>
+      </div>   
     </nav>
   )
 }

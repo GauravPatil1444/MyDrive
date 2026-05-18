@@ -48,6 +48,8 @@ export interface MainContextType {
   fileName: any;
   setfileName: any;
   loading: any;
+  sync: any;
+  setsync:any;
 }
 
 export const MainContext = createContext<MainContextType|null>(null);
@@ -101,10 +103,13 @@ function Main() {
     const [viewFile, setviewFile] = useState(false);
     const [fileStack, setfileStack] = useState("");
     const [uploadProgress, setuploadProgress] = useState<number>();
+    const [sync, setsync] = useState(false);
 
 
     const syncData = async () => {
         setloading(true);
+        localStorage.setItem('data','');
+        setdata([]);
         const id: any = localStorage.getItem('user');
         if (id === null) {
             window.location.assign("/auth")
@@ -135,6 +140,7 @@ function Main() {
             });
         });
         setloading(false);
+        setsync(false);
     }
 
     const chooseFile = (value: string, file: any) => {
@@ -314,11 +320,17 @@ function Main() {
         syncData();
     }, []);
 
+    useEffect( () => {
+      if(sync){
+        syncData();
+      }
+    }, [sync])
+    
 
     let displayData = filteredData.length > 0 ? filteredData : data;
 
     return (
-        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo, setadd, newFile, foldername, setfoldername, add, handleUpload, chooseFile, handleCreate, newFolder, uploadbtn, data, setnewFolder, setnewFile, fileName, setfileName, loading}}>
+        <MainContext.Provider value={{ heading, setheading, placeholder, setplaceholder, itemClick, fileStack, setfileStack, viewFile, setviewFile, setFilteredData, fileInfo, setadd, newFile, foldername, setfoldername, add, handleUpload, chooseFile, handleCreate, newFolder, uploadbtn, data, setnewFolder, setnewFile, fileName, setfileName, loading, sync, setsync}}>
             <Navbar />
             {viewFile ? <FileInfo/> :
                 <>
