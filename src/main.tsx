@@ -1,23 +1,26 @@
+import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter } from "react-router";
-import { RouterProvider } from "react-router/dom";
+import { createBrowserRouter, RouterProvider } from "react-router";
 import './index.css'
-import App from './App.tsx'
-import Authentication from "./Components/Authentication.tsx";
-import Profile from "./Components/Profile.tsx";
+
+const App = React.lazy(() => import('./App.tsx'));
+const Authentication = React.lazy(() => import('./Components/Authentication.tsx'));
+const Profile = React.lazy(() => import('./Components/Profile.tsx'));
+
+const fallback = <div className="h-screen w-full flex items-center justify-center dark:text-white">Loading...</div>;
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App/>,
+    element: <Suspense fallback={fallback}><App/></Suspense>,
   },
   {
     path: "/auth",
-    element: <Authentication/>,
+    element: <Suspense fallback={fallback}><Authentication/></Suspense>,
   },
   {
     path: "/profile",
-    element: <Profile/>,
+    element: <Suspense fallback={fallback}><Profile/></Suspense>,
   },
 ]);
 
